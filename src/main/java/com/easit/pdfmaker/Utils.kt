@@ -15,6 +15,7 @@ import com.easit.pdfmaker.javaModels.data.ResumeItem
 import com.easit.pdfmaker.kotlinModels.AllResultData
 import com.easit.pdfmaker.kotlinModels.CoverLetterData
 import com.easit.pdfmaker.kotlinModels.ResumeData
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.FileOutputStream
@@ -23,6 +24,11 @@ import java.io.OutputStream
 fun deserialize(text: String): AllResultData {
     val data: AllResultData = Json.decodeFromString(text.trim())
     return data
+}
+
+fun serialize(data: AllResultData): String{
+    val serializedString: String = Json.encodeToString(data)
+    return serializedString
 }
 
 fun resumeConverter(item: ResumeData): ResumeItem {
