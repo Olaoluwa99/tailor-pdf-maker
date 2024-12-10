@@ -66,5 +66,6 @@ data class EducationItem(
 @Serializable
 data class ProjectItem(
     val projectName: String,
+    val createdMonthYear: String,
     val projectDetail: String
 )

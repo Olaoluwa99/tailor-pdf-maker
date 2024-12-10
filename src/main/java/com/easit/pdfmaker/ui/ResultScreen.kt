@@ -3,10 +3,8 @@ package com.easit.pdfmaker.ui
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ContextualFlowRowOverflowScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,14 +22,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.outlined.TextSnippet
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ChipColors
@@ -41,6 +35,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,17 +54,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.easit.pdfmaker.NavigationIcon
 import com.easit.pdfmaker.coverLetterConverter
 import com.easit.pdfmaker.deserialize
 import com.easit.pdfmaker.fileToByteArray
 import com.easit.pdfmaker.javaModels.MakeCoverLetter
 import com.easit.pdfmaker.javaModels.MakeResume
 import com.easit.pdfmaker.kotlinModels.AllResultData
-import com.easit.pdfmaker.kotlinModels.SettingsReplica
+import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
 import com.easit.pdfmaker.requestPermissions
 import com.easit.pdfmaker.resumeConverter
 import com.easit.pdfmaker.savePdfToExternalStorage
@@ -81,7 +77,10 @@ import java.io.File
 fun ResultScreen(
     tagId: String,
     resultString: String,
-    settings: SettingsReplica
+    settings: PdfMakerSettingsReplica,
+    onReturn: () -> Unit,
+    onEditResume: (String) -> Unit,
+    onEditCoverLetter: (String) -> Unit
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -126,6 +125,18 @@ fun ResultScreen(
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         sheetSwipeEnabled = false,
         sheetDragHandle = null,
+        topBar = {
+            TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = if (!settings.extremeAmoledMode) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Black
+                ),
+                title = { Text(""/*"Resume & Cover letter"*/) },
+                navigationIcon = {
+                    NavigationIcon { onReturn() }
+                },
+                actions = {/**/}
+            )
+        },
         sheetContent = {
             Column(
                 modifier = Modifier
@@ -197,7 +208,13 @@ fun ResultScreen(
                             .weight(1f),
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(vertical = 16.dp),
-                        onClick = {/**/}
+                        onClick = {
+                            if (isShowingResume){
+                                onEditResume(resultString)
+                            }else{
+                                onEditCoverLetter(resultString)
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Edit,

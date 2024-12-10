@@ -1,6 +1,6 @@
 package com.easit.pdfmaker.kotlinModels
 
-data class SettingsReplica(
+data class PdfMakerSettingsReplica(
     val viewMode: Boolean = true,
     val automaticTheme: Boolean = true,
     val darkTheme: Boolean = false,

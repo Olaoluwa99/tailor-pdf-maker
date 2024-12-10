@@ -31,14 +31,15 @@ import com.easit.pdfmaker.UploadButton
 import com.easit.pdfmaker.connectivityStatus
 import com.easit.pdfmaker.constants.Constant
 import com.easit.pdfmaker.kotlinModels.AllResultData
-import com.easit.pdfmaker.kotlinModels.SettingsReplica
+import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
 import com.easit.tailor.helper.ConnectionStatus
 
+/*
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditResumeScreen(
     allResultData: AllResultData,
-    settings: SettingsReplica,
+    settings: PdfMakerSettingsReplica,
     onReturn: () -> Unit,
 ) {
     //
@@ -77,11 +78,13 @@ fun EditResumeScreen(
                 onClick = {
                     if (isConnected){
                         if (!isUpdateSaved) {
-                            /*if (profileViewModel.profileNameTextField.value.isNotBlank()){
+                            */
+/*if (profileViewModel.profileNameTextField.value.isNotBlank()){
                                 profileViewModel.updateProfileDetail()
                             }else{
                                 Toast.makeText(context, "Profile name cannot be left blank.", Toast.LENGTH_SHORT).show()
-                            }*/
+                            }*//*
+
                         }else{
                             Toast.makeText(context, "Your details are up to date.", Toast.LENGTH_SHORT).show()
                         }
@@ -107,4 +110,4 @@ fun EditResumeScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
-}
+}*/
