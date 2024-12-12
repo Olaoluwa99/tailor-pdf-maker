@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines)
     implementation(libs.googleid)
 
+    implementation(libs.kotlin.datetime)
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

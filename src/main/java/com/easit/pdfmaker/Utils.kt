@@ -21,12 +21,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-fun deserialize(text: String): AllResultData {
+fun deserializeAllResultData(text: String): AllResultData {
     val data: AllResultData = Json.decodeFromString(text.trim())
     return data
 }
 
-fun serialize(data: AllResultData): String{
+fun serializeAllResultData(data: AllResultData): String{
     val serializedString: String = Json.encodeToString(data)
     return serializedString
 }

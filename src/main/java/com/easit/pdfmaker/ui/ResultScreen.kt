@@ -39,6 +39,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,14 +59,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.easit.pdfmaker.NavigationIcon
 import com.easit.pdfmaker.coverLetterConverter
-import com.easit.pdfmaker.deserialize
+import com.easit.pdfmaker.deserializeAllResultData
 import com.easit.pdfmaker.fileToByteArray
 import com.easit.pdfmaker.javaModels.MakeCoverLetter
 import com.easit.pdfmaker.javaModels.MakeResume
-import com.easit.pdfmaker.kotlinModels.AllResultData
 import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
+import com.easit.pdfmaker.kotlinModels.PdfMakerUser
 import com.easit.pdfmaker.requestPermissions
 import com.easit.pdfmaker.resumeConverter
 import com.easit.pdfmaker.savePdfToExternalStorage
@@ -75,6 +78,10 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ResultScreen(
+    user: PdfMakerUser,
+    defaultProfileName: String,
+    defaultJobDescription: String,
+    defaultUserDetailText: String,
     tagId: String,
     resultString: String,
     settings: PdfMakerSettingsReplica,
@@ -86,19 +93,29 @@ fun ResultScreen(
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val context = LocalContext.current
+    val resultViewModel = viewModel<ResultViewModel>()
 
-    var resultData by remember { mutableStateOf(AllResultData()) }
+    LaunchedEffect (key1 = 0) {
+        resultViewModel.setUserItem(
+            user = user,
+            data = deserializeAllResultData(resultString),
+            defaultProfileName = defaultProfileName,
+            defaultJobDescription = defaultJobDescription,
+            defaultUserDetailText = defaultUserDetailText
+        )
+    }
+
+    //
     var resumeItemPath by remember { mutableStateOf("") }
     var coverLetterItemPath by remember { mutableStateOf("") }
     var hasFilesBeenRetrieved by remember { mutableStateOf(false) }
     when{
         resultString.isNotBlank() /*&& !hasFilesBeenRetrieved*/ -> {
-            resultData = deserialize(resultString)
             resumeItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/RES-$tagId.pdf"
             coverLetterItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/COV-$tagId.pdf"
-            if (resultData.resume != null) {
-                MakeResume(resumeItemPath).makeResume(resumeConverter(resultData.resume!!))
-                MakeCoverLetter(coverLetterItemPath).makeCoverLetter(coverLetterConverter(resultData.coverLetter!!))
+            if (resultViewModel.resultData.collectAsState().value.resume != null) {
+                MakeResume(resumeItemPath).makeResume(resumeConverter(resultViewModel.resultData.collectAsState().value.resume!!))
+                MakeCoverLetter(coverLetterItemPath).makeCoverLetter(coverLetterConverter(resultViewModel.resultData.collectAsState().value.coverLetter!!))
             }
             Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
             hasFilesBeenRetrieved = true
@@ -272,7 +289,7 @@ fun ResultScreen(
                         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
                     ) {
                         Text(
-                            text = "KEYWORDS (${resultData.keywords.size})",
+                            text = "KEYWORDS (${resultViewModel.resultData.collectAsState().value.keywords.size})",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
@@ -288,7 +305,7 @@ fun ResultScreen(
                             verticalArrangement = Arrangement.spacedBy(0.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            for(item in resultData.keywords){
+                            for(item in resultViewModel.resultData.collectAsState().value.keywords){
                                 ElevatedSuggestionChip(
                                     label = {
                                         Text(
