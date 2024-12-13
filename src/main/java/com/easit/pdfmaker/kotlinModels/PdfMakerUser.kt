@@ -1,8 +1,10 @@
 package com.easit.pdfmaker.kotlinModels
 
 import androidx.annotation.Keep
+import kotlinx.serialization.Serializable
 
 @Keep
+@Serializable
 data class PdfMakerUser(
     val id: String? = null,
     val email: String? = null,
@@ -37,6 +39,7 @@ data class PdfMakerUser(
 val defaultListItem = listOf("", "", "")
 
 @Keep
+@Serializable
 data class PdfMakerHistory(
     val id: String? = null,
     val companyName: String? = null,

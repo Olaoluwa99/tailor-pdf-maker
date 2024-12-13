@@ -14,6 +14,7 @@ import com.easit.pdfmaker.javaModels.data.ProjectItem
 import com.easit.pdfmaker.javaModels.data.ResumeItem
 import com.easit.pdfmaker.kotlinModels.AllResultData
 import com.easit.pdfmaker.kotlinModels.CoverLetterData
+import com.easit.pdfmaker.kotlinModels.PdfMakerUser
 import com.easit.pdfmaker.kotlinModels.ResumeData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -27,6 +28,11 @@ fun deserializeAllResultData(text: String): AllResultData {
 }
 
 fun serializeAllResultData(data: AllResultData): String{
+    val serializedString: String = Json.encodeToString(data)
+    return serializedString
+}
+
+fun serializeUser(data: PdfMakerUser): String{
     val serializedString: String = Json.encodeToString(data)
     return serializedString
 }

@@ -3,6 +3,7 @@ package com.easit.pdfmaker.ui
 import android.os.Build
 import android.os.Environment
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -71,6 +72,8 @@ import com.easit.pdfmaker.kotlinModels.PdfMakerUser
 import com.easit.pdfmaker.requestPermissions
 import com.easit.pdfmaker.resumeConverter
 import com.easit.pdfmaker.savePdfToExternalStorage
+import com.easit.pdfmaker.serializeAllResultData
+import com.easit.pdfmaker.serializeUser
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
 import java.io.File
@@ -85,9 +88,9 @@ fun ResultScreen(
     tagId: String,
     resultString: String,
     settings: PdfMakerSettingsReplica,
-    onReturn: () -> Unit,
-    onEditResume: (String) -> Unit,
-    onEditCoverLetter: (String) -> Unit
+    onReturn: (user: String) -> Unit,
+    onEditResume: (resultJson: String, userJson: String) -> Unit,
+    onEditCoverLetter: (resultJson: String, userJson: String) -> Unit
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -103,6 +106,10 @@ fun ResultScreen(
             defaultJobDescription = defaultJobDescription,
             defaultUserDetailText = defaultUserDetailText
         )
+    }
+
+    BackHandler {
+        onReturn(serializeUser(resultViewModel.user.value))
     }
 
     //
@@ -149,7 +156,7 @@ fun ResultScreen(
                 ),
                 title = { Text(""/*"Resume & Cover letter"*/) },
                 navigationIcon = {
-                    NavigationIcon { onReturn() }
+                    NavigationIcon { onReturn(serializeUser(resultViewModel.user.value)) }
                 },
                 actions = {/**/}
             )
@@ -227,9 +234,9 @@ fun ResultScreen(
                         contentPadding = PaddingValues(vertical = 16.dp),
                         onClick = {
                             if (isShowingResume){
-                                onEditResume(resultString)
+                                onEditResume(resultString, serializeUser(resultViewModel.user.value))
                             }else{
-                                onEditCoverLetter(resultString)
+                                onEditCoverLetter(resultString, serializeUser(resultViewModel.user.value))
                             }
                         }
                     ) {
@@ -349,6 +356,7 @@ fun ResultScreen(
             //
             Text(resumeItemPath)
             Text(coverLetterItemPath)
+            Text(user.toString())
             Spacer(modifier = Modifier.height(24.dp))
 
             //
