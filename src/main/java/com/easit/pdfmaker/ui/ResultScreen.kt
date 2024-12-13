@@ -77,6 +77,7 @@ import com.easit.pdfmaker.serializeUser
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -98,6 +99,22 @@ fun ResultScreen(
     val context = LocalContext.current
     val resultViewModel = viewModel<ResultViewModel>()
 
+    BackHandler {
+        onReturn(serializeUser(resultViewModel.user.value))
+    }
+
+    //
+    /*var resumeItemFile by remember { mutableStateOf<File?>(null) }
+    var coverLetterItemFile by remember { mutableStateOf<File?>(null) }*/
+
+    var resumeItemPath by remember { mutableStateOf("") }
+    var coverLetterItemPath by remember { mutableStateOf("") }
+    var hasFilesBeenRetrieved by remember { mutableStateOf(false) }
+
+    var outputResumeFile: File? by remember { mutableStateOf(null) }
+    var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
+    var isShowingResume by remember { mutableStateOf(true) }
+
     LaunchedEffect (key1 = 0) {
         resultViewModel.setUserItem(
             user = user,
@@ -106,28 +123,47 @@ fun ResultScreen(
             defaultJobDescription = defaultJobDescription,
             defaultUserDetailText = defaultUserDetailText
         )
-    }
 
-    BackHandler {
-        onReturn(serializeUser(resultViewModel.user.value))
-    }
+        if (resultString.isNotBlank()) {
+            try {
+                //Setup path and create file
+                resumeItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/RES-$tagId.pdf"
+                coverLetterItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/COV-$tagId.pdf"
+                outputResumeFile = File(resumeItemPath)
+                outputCoverLetterFile = File(coverLetterItemPath)
 
-    //
-    var resumeItemPath by remember { mutableStateOf("") }
-    var coverLetterItemPath by remember { mutableStateOf("") }
-    var hasFilesBeenRetrieved by remember { mutableStateOf(false) }
-    when{
-        resultString.isNotBlank() /*&& !hasFilesBeenRetrieved*/ -> {
-            resumeItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/RES-$tagId.pdf"
-            coverLetterItemPath = "${File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "/files/mains").absolutePath}/COV-$tagId.pdf"
-            if (resultViewModel.resultData.collectAsState().value.resume != null) {
-                MakeResume(resumeItemPath).makeResume(resumeConverter(resultViewModel.resultData.collectAsState().value.resume!!))
-                MakeCoverLetter(coverLetterItemPath).makeCoverLetter(coverLetterConverter(resultViewModel.resultData.collectAsState().value.coverLetter!!))
+                //Ensure the parent directory exists
+                outputResumeFile!!.parentFile?.mkdirs()
+                outputCoverLetterFile!!.parentFile?.mkdirs()
+
+                //
+                if (outputResumeFile != null ){
+                    if (!outputResumeFile!!.exists()) outputResumeFile!!.createNewFile()
+                }
+                if (outputCoverLetterFile != null ){
+                    if (!outputCoverLetterFile!!.exists()) outputCoverLetterFile!!.createNewFile()
+                }
+
+                //
+                MakeResume(resumeItemPath).makeResume(resumeConverter(resultViewModel.resultData.value.resume!!))
+                MakeCoverLetter(coverLetterItemPath).makeCoverLetter(coverLetterConverter(resultViewModel.resultData.value.coverLetter!!))
+                Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
+                hasFilesBeenRetrieved = true
+            }catch (io: IOException){
+                println(io.localizedMessage)
+                io.printStackTrace()
+                Toast.makeText(context, "File creating issue I/O", Toast.LENGTH_SHORT).show()
+            }catch (e: Exception){
+                println(e.localizedMessage)
+                e.printStackTrace()
+                Toast.makeText(context, "File creating issue Default", Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
-            hasFilesBeenRetrieved = true
+        }else {
+            hasFilesBeenRetrieved = false
         }
     }
+
+
     val localDensity = LocalDensity.current
     var buttonHeightDp by remember { mutableStateOf(0.dp) }
 
@@ -138,9 +174,6 @@ fun ResultScreen(
     var isBottomSheetFull by remember { mutableStateOf(false) }
     var showKeywordsSection by remember { mutableStateOf(false) }
     //var buttonSize by remember { mutableStateOf(IntSize.Zero) }
-    var outputResumeFile: File? by remember { mutableStateOf(null) }
-    var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
-    var isShowingResume by remember { mutableStateOf(true) }
 
 
     BottomSheetScaffold(
@@ -354,16 +387,14 @@ fun ResultScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             //
-            Text(resumeItemPath)
-            Text(coverLetterItemPath)
-            Text(user.toString())
-            Spacer(modifier = Modifier.height(24.dp))
+            //Text(resumeItemPath)
+            //Text(coverLetterItemPath)
+            //Text(user.toString())
+            //Spacer(modifier = Modifier.height(24.dp))
 
             //
             if (hasFilesBeenRetrieved){
                 if (resumeItemPath.isNotBlank()){
-                    outputResumeFile = File(resumeItemPath)
-                    outputCoverLetterFile = File(coverLetterItemPath)
                     if (isShowingResume){
                         if (outputResumeFile!!.exists()){
                             PdfRendererViewCompose(
