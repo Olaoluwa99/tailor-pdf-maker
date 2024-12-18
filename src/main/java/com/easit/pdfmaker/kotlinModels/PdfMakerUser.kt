@@ -31,8 +31,8 @@ data class PdfMakerUser(
     val profileHobbies: List<String> = defaultListItem,
     val profileOthers: List<String> = defaultListItem,
 
-    val defaultResumesJson: List<String> = defaultListItem,
-    val defaultCoverLettersJson: List<String> = defaultListItem,
+    val profileCoverLetterTitle: List<String> = listOf("Cover Letter 1", "Cover Letter 2", "Cover Letter 3"),
+    val profileCoverLetterDataJson: List<String> = defaultListItem,
 
     val hasUsedApp: Boolean = false,
 )
