@@ -1,6 +1,5 @@
 package com.easit.pdfmaker.ui
 
-import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -62,18 +61,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.easit.pdfmaker.NavigationIcon
-import com.easit.pdfmaker.coverLetterConverter
 import com.easit.pdfmaker.deserializeAllResultData
 import com.easit.pdfmaker.fileToByteArray
-import com.easit.pdfmaker.javaModels.MakeCoverLetter
-import com.easit.pdfmaker.javaModels.MakeResume
 import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
-import com.easit.pdfmaker.kotlinModels.PdfMakerUser
-import com.easit.pdfmaker.requestPermissions
-import com.easit.pdfmaker.resumeConverter
+import com.easit.pdfmaker.kotlinModels.makers.CoverLetterMaker
+import com.easit.pdfmaker.kotlinModels.makers.ResumeMaker
 import com.easit.pdfmaker.savePdfToExternalStorage
-import com.easit.pdfmaker.serializeAllResultData
-import com.easit.pdfmaker.serializeUser
+import com.lowagie.text.FontFactory
+import com.lowagie.text.Paragraph
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
 import java.io.File
@@ -82,16 +77,14 @@ import java.io.IOException
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ResultScreen(
-    user: PdfMakerUser,
-    defaultProfileName: String,
-    defaultJobDescription: String,
-    defaultUserDetailText: String,
+    isOnlyResume: Boolean,
+    isOnlyCoverLetter: Boolean,
     tagId: String,
     resultString: String,
     settings: PdfMakerSettingsReplica,
-    onReturn: (user: String) -> Unit,
-    onEditResume: (resultJson: String, userJson: String) -> Unit,
-    onEditCoverLetter: (resultJson: String, userJson: String) -> Unit
+    onReturn: () -> Unit,
+    onEditResume: () -> Unit,
+    onEditCoverLetter: () -> Unit
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -100,7 +93,7 @@ fun ResultScreen(
     val resultViewModel = viewModel<ResultViewModel>()
 
     BackHandler {
-        onReturn(serializeUser(resultViewModel.user.value))
+        onReturn()
     }
 
     //
@@ -115,13 +108,11 @@ fun ResultScreen(
     var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
     var isShowingResume by remember { mutableStateOf(true) }
 
+    var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, /*Sections.EXPERIENCE,*/ Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
+
     LaunchedEffect (key1 = 0) {
         resultViewModel.setUserItem(
-            user = user,
             data = deserializeAllResultData(resultString),
-            defaultProfileName = defaultProfileName,
-            defaultJobDescription = defaultJobDescription,
-            defaultUserDetailText = defaultUserDetailText
         )
 
         if (resultString.isNotBlank()) {
@@ -145,8 +136,22 @@ fun ResultScreen(
                 }
 
                 //
-                MakeResume(resumeItemPath).makeResume(resumeConverter(resultViewModel.resultData.value.resume!!))
-                MakeCoverLetter(coverLetterItemPath).makeCoverLetter(coverLetterConverter(resultViewModel.resultData.value.coverLetter!!))
+                ResumeMaker(resumeItemPath)
+                    .createResume(
+                        item = resultViewModel.resultData.value.resume!!,
+                        skillFormatType = "SINGLE-LIST",
+                        softSkillFormatType = "WRAP",
+                        showUnderline = true,
+                        themeColor = ThemeColor.BLACK,
+                        styleType = StyleType.ALPHA,
+                        sectionList = sectionList
+                    )
+                //
+                CoverLetterMaker(
+                    coverLetterItemPath,
+                    "",
+                    "ALPHA"
+                ).createCoverLetter(resultViewModel.resultData.value.coverLetter!!)
                 Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
                 hasFilesBeenRetrieved = true
             }catch (io: IOException){
@@ -189,7 +194,7 @@ fun ResultScreen(
                 ),
                 title = { Text(""/*"Resume & Cover letter"*/) },
                 navigationIcon = {
-                    NavigationIcon { onReturn(serializeUser(resultViewModel.user.value)) }
+                    NavigationIcon { onReturn() }
                 },
                 actions = {/**/}
             )
@@ -237,9 +242,6 @@ fun ResultScreen(
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(vertical = 16.dp),
                         onClick = {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                requestPermissions(context)  // Ensure permission is requested
-                            }
                             if (isShowingResume){
                                 if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId")
                             }else{
@@ -267,9 +269,9 @@ fun ResultScreen(
                         contentPadding = PaddingValues(vertical = 16.dp),
                         onClick = {
                             if (isShowingResume){
-                                onEditResume(resultString, serializeUser(resultViewModel.user.value))
+                                onEditResume()
                             }else{
-                                onEditCoverLetter(resultString, serializeUser(resultViewModel.user.value))
+                                onEditCoverLetter()
                             }
                         }
                     ) {
@@ -387,12 +389,6 @@ fun ResultScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             //
-            //Text(resumeItemPath)
-            //Text(coverLetterItemPath)
-            //Text(user.toString())
-            //Spacer(modifier = Modifier.height(24.dp))
-
-            //
             if (hasFilesBeenRetrieved){
                 if (resumeItemPath.isNotBlank()){
                     if (isShowingResume){
@@ -414,4 +410,16 @@ fun ResultScreen(
             }
         }
     }
+}
+
+enum class ThemeColor{
+    RED, GREEN, BLACK, BLUE, YELLOW, LIGHT_GRAY, DARK_GRAY
+}
+
+enum class StyleType{
+    ALPHA, BETA, DELTA, GAMMA, OMEGA
+}
+
+enum class Sections{
+    OBJECTIVE, EXPERIENCE, EDUCATION, PROJECT, SKILLS, SOFT_SKILLS, CERTIFICATIONS, HOBBIES
 }

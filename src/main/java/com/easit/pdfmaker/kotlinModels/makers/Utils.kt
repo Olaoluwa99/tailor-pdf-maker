@@ -1,0 +1,426 @@
+package com.easit.pdfmaker.kotlinModels.makers
+
+import com.easit.pdfmaker.kotlinModels.EducationItem
+import com.easit.pdfmaker.kotlinModels.ExperienceItem
+import com.easit.pdfmaker.kotlinModels.ProjectItem
+import com.lowagie.text.Anchor
+import com.lowagie.text.Chunk
+import com.lowagie.text.Document
+import com.lowagie.text.Element
+import com.lowagie.text.Font
+import com.lowagie.text.FontFactory
+import com.lowagie.text.List
+import com.lowagie.text.ListItem
+import com.lowagie.text.Paragraph
+import com.lowagie.text.Phrase
+import com.lowagie.text.pdf.PdfContentByte
+import com.lowagie.text.pdf.PdfPCell
+import com.lowagie.text.pdf.PdfPTable
+import com.lowagie.text.pdf.PdfWriter
+import com.lowagie.text.pdf.draw.LineSeparator
+import java.awt.Color
+
+fun createContactDetailsSection(
+    iName: String?,
+    iJobRole: String?,
+    iPhone: String, iEmail: String,
+    iLocation: String?,
+    iLinkCover1: String?, iLinkCover2: String?,
+    iLink1: String?, iLink2: String?,
+    isSplitLink: Boolean?
+): Paragraph {
+    val timesNewRomanName = FontFactory.getFont(FontFactory.TIMES_BOLD, 24f)
+    val timesNewRomanRole = FontFactory.getFont(FontFactory.TIMES, 16f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val linkFont = FontFactory.getFont(
+        FontFactory.TIMES,
+        12f,
+        Font.UNDERLINE,
+        Color(0, 0, 255)
+    ) // Blue color for hyperlink
+
+    //
+    val emailLink = Anchor(iEmail, linkFont)
+    emailLink.reference = "mailto:$iEmail"
+    //START
+    //Name
+    val name = Paragraph(iName, timesNewRomanName)
+    name.setAlignment("Center")
+    //name.setSpacingAfter(7.5f);
+    //Role
+    val role = Paragraph(iJobRole, timesNewRomanRole)
+    role.setAlignment("Center")
+    role.spacingAfter = 2.5f
+    //Contact
+    val contact = Paragraph()
+    contact.add(Chunk("$iPhone | ", timesNewRomanPlain))
+    contact.add(emailLink)
+    contact.setAlignment("Center")
+    //Location
+    val location = Paragraph(iLocation, timesNewRomanPlain)
+    location.setAlignment("Center")
+
+
+    //Links
+    val links = Paragraph()
+    if (iLink1 != null && iLinkCover1 != null) {
+        val link1 = Anchor(iLink1, linkFont)
+        link1.reference = iLink1
+        links.add(Chunk("$iLinkCover1: ", timesNewRomanPlain))
+        links.add(link1)
+    }
+    if (iLink2 != null && iLinkCover2 != null) {
+        val link2 = Anchor(iLink2, linkFont)
+        link2.reference = iLink2
+        //
+        if (!isSplitLink!!) {
+            if (iLink1 != null && iLinkCover1 != null) {
+                links.add(Chunk(" | ", timesNewRomanPlain))
+            }
+            links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
+            links.add(link2)
+        } else {
+            links.add(Chunk.NEWLINE)
+            links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
+            links.add(link2)
+        }
+    }
+    links.setAlignment("Center")
+    links.spacingAfter = 10f
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(name)
+    section.add(role)
+    section.add(contact)
+    section.add(location)
+
+    val link1State = iLink1 != null && iLinkCover1 != null
+    val link2State = iLink2 != null && iLinkCover2 != null
+    if (link1State || link2State) {
+        section.add(links)
+    }
+
+
+    return section
+}
+
+fun createHalfContactSection(
+    iPhone: String?, iEmail: String,
+    iLocation: String?,
+    iLinkCover1: String?, iLinkCover2: String?,
+    iLink1: String?, iLink2: String?
+): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val linkFont = FontFactory.getFont(FontFactory.TIMES, 12f, Font.UNDERLINE, Color(0, 0, 255))
+
+    //
+    val emailLink = Anchor(iEmail, linkFont)
+    emailLink.reference = "mailto:$iEmail"
+    //START
+    //
+    val phone = Paragraph(iPhone, timesNewRomanPlain)
+    val contact = Paragraph()
+    contact.add(emailLink)
+    //Location
+    val location = Paragraph(iLocation, timesNewRomanPlain)
+
+
+    //Links
+    val links = Paragraph()
+    if (iLink1 != null && iLinkCover1 != null) {
+        val link1 = Anchor(iLink1, linkFont)
+        link1.reference = iLink1
+        links.add(link1)
+    }
+    if (iLink2 != null && iLinkCover2 != null) {
+        val link2 = Anchor(iLink2, linkFont)
+        link2.reference = iLink2
+        links.add(Chunk.NEWLINE)
+        links.add(link2)
+    }
+    links.spacingAfter = 10f
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(phone)
+    section.add(contact)
+    section.add(location)
+
+    val link1State = iLink1 != null && iLinkCover1 != null
+    val link2State = iLink2 != null && iLinkCover2 != null
+    if (link1State || link2State) {
+        section.add(links)
+    }
+    return section
+}
+
+fun createHeader(text: String?): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val header = Paragraph(text, timesNewRomanBold)
+    header.spacingAfter = 5f // Add some spacing after the header
+    return header
+}
+
+fun createHeaderWithHorizontalLine(
+    document: Document,
+    writer: PdfWriter,
+    paragraphText: String,
+    lineColor: Color
+) {
+    // Add paragraph text to the document
+    val paragraph = Paragraph(paragraphText)
+    document.add(paragraph)
+    val contentByte: PdfContentByte = writer.directContent
+
+    // Convert Android's Color to OpenPDF's Color
+    //val pdfColor = com.lowagie.text.Color(Color.red(lineColor), Color.green(lineColor), Color.blue(lineColor))
+
+    // Set the stroke color for the line
+    contentByte.setColorStroke(lineColor)
+    contentByte.setLineWidth(1f)
+    val yPos = document.pageSize.height - document.topMargin() - 60
+    contentByte.moveTo(document.leftMargin(), yPos)
+    contentByte.lineTo(document.pageSize.width - document.rightMargin(), yPos)
+
+    // Stroke the line (actually draw it on the PDF)
+    contentByte.stroke()
+}
+
+fun createHeaderWithHorizontalLine(headerText: String, lineColor: Color): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val header = Paragraph(headerText, timesNewRomanBold)
+
+    val lineSeparator = LineSeparator()
+    lineSeparator.lineWidth = 1f
+    lineSeparator.lineColor = lineColor
+    lineSeparator.percentage = 100f
+
+    val lineChunk = Chunk(lineSeparator)
+    val test = Paragraph(Chunk(lineSeparator))
+    test.spacingBefore = -5f
+
+    val section = Paragraph()
+    section.add(header)
+    section.add(lineChunk)
+    section.spacingAfter = 10f
+
+    return section
+}
+
+fun createMain(text: String?): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    return Paragraph(text, timesNewRomanPlain)
+}
+
+fun createObjectiveSection(text: String?): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+
+    val objectiveText = Paragraph(text, timesNewRomanPlain)
+    //
+    val section = Paragraph()
+    section.add(objectiveText)
+
+    return section
+}
+
+fun createExperienceSection(experienceItem: ExperienceItem): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val timesNewRomanItalics = FontFactory.getFont(FontFactory.TIMES_ITALIC, 12f)
+
+    // SET 2
+    val table = PdfPTable(2)
+    table.widthPercentage = 100f // Make table span the full width of the page
+    table.setWidths(intArrayOf(50, 50)) // Set column widths (50% for left, 50% for right)
+    table.setSpacingBefore(3f) // No space before the table
+    table.setSpacingAfter(3f) // No space after the table
+    //
+    val leftCell = PdfPCell(Phrase(0f, experienceItem.experienceRole, timesNewRomanBold))
+    leftCell.border = PdfPCell.NO_BORDER // Remove the border
+    leftCell.horizontalAlignment = Element.ALIGN_LEFT // Align text to the left
+    leftCell.setPadding(0f) // Remove padding inside the cell
+    table.addCell(leftCell)
+    //
+    val rightCell = PdfPCell(Phrase(0f, experienceItem.experienceWorkDate, timesNewRomanPlain))
+    rightCell.border = PdfPCell.NO_BORDER // Remove the border
+    rightCell.horizontalAlignment = Element.ALIGN_RIGHT // Align text to the right
+    rightCell.setPadding(0f) // Remove padding inside the cell
+    table.addCell(rightCell)
+
+
+    //SET 3
+    val boldLocation = Chunk(experienceItem.experienceCompanyName + " |", timesNewRomanBold)
+    val regularLocation = Chunk(" " + experienceItem.experienceCompanyLocation, timesNewRomanItalics)
+    val locationText = Paragraph()
+    locationText.add(boldLocation)
+    locationText.add(regularLocation)
+
+
+    //SET 4
+    val bulletList = List(List.UNORDERED)
+    bulletList.symbolIndent = 10f
+    bulletList.setListSymbol("•")
+    for (nItem in experienceItem.experienceItemsList) {
+        val item = ListItem("  $nItem", timesNewRomanPlain)
+        item.setAlignment("Justify")
+        bulletList.add(item)
+    }
+
+    //CLOSE
+    val section = Paragraph()
+    //section.add(experienceHeader);
+    section.add(table)
+    section.add(locationText)
+    section.add(bulletList)
+
+    return section
+}
+
+fun createEducationSection(item: EducationItem): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val timesNewRomanItalics = FontFactory.getFont(FontFactory.TIMES_ITALIC, 12f)
+    val section = Paragraph()
+
+    //
+    val schoolName = Chunk(item.schoolName + " |", timesNewRomanBold)
+    val schoolLocation = Chunk(" " + item.schoolLocation, timesNewRomanItalics)
+    val schoolDetail = Paragraph()
+    schoolDetail.add(schoolName)
+    schoolDetail.add(schoolLocation)
+    //
+    val educationTable = PdfPTable(2)
+    educationTable.widthPercentage = 100f
+    educationTable.setWidths(intArrayOf(65, 35))
+    educationTable.setSpacingBefore(3f)
+    //
+    val schoolDetailItem = PdfPCell(schoolDetail)
+    schoolDetailItem.border = PdfPCell.NO_BORDER
+    schoolDetailItem.horizontalAlignment = Element.ALIGN_LEFT
+    schoolDetailItem.setPadding(0f)
+    educationTable.addCell(schoolDetailItem)
+    //
+    val graduatedDate = PdfPCell(Phrase(0f, item.graduatedDate, timesNewRomanPlain))
+    graduatedDate.border = PdfPCell.NO_BORDER
+    graduatedDate.horizontalAlignment = Element.ALIGN_RIGHT
+    graduatedDate.setPadding(0f)
+    educationTable.addCell(graduatedDate)
+    //
+    section.add(educationTable)
+
+
+    //DEGREE DETAILS
+    val degreeDetail = Paragraph(item.degreeEarned, timesNewRomanPlain)
+    degreeDetail.setAlignment("Justify")
+    degreeDetail.spacingAfter = 10f
+    section.add(degreeDetail)
+
+    return section
+}
+
+fun createProjectsSection(item: ProjectItem): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val section = Paragraph()
+
+    //SET
+    val projectTitle = Paragraph(item.projectName, timesNewRomanBold)
+    val projectDetail = Paragraph(item.projectDetail, timesNewRomanPlain)
+    projectDetail.setAlignment("Justify")
+    //
+    section.add(projectTitle)
+    section.add(projectDetail)
+    return section
+}
+
+fun createSingleColumnSection(list: kotlin.collections.List<String>): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+
+    //SET
+    val bulletList = List(List.UNORDERED)
+    bulletList.symbolIndent = 10f
+    bulletList.setListSymbol("•")
+    for (i in list) {
+        val item = ListItem("  $i", timesNewRomanPlain)
+        item.setAlignment("Justify")
+        bulletList.add(item)
+    }
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(bulletList)
+
+    return section
+}
+
+fun createDualColumnSection(dualItem: kotlin.collections.List<String>): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val listA: MutableList<String> = ArrayList()
+    val listB: MutableList<String> = ArrayList()
+    splitList(dualItem, listA, listB)
+
+    //
+    val dualList1 = List(List.UNORDERED)
+    dualList1.symbolIndent = 12f
+    dualList1.setListSymbol("•")
+    for (i in listA - 1) {
+        dualList1.add(ListItem("  $i", timesNewRomanPlain))
+    }
+    //
+    val dualList2 = List(List.UNORDERED)
+    dualList2.symbolIndent = 12f
+    dualList2.setListSymbol("•")
+    for (i in listB) {
+        dualList2.add(ListItem("  $i", timesNewRomanPlain))
+    }
+    //-----------------------------------------------------------------------------
+    val dualListTable = PdfPTable(2)
+    dualListTable.headerRows = 0
+    dualListTable.widthPercentage = 100f
+    dualListTable.isSplitLate = false
+    dualListTable.isSplitRows = true
+    //
+    val dualCell1 = PdfPCell()
+    dualCell1.addElement(dualList1)
+    dualCell1.border = PdfPCell.NO_BORDER
+    dualCell1.setPadding(0f)
+    dualListTable.addCell(dualCell1)
+    //
+    val dualCell2 = PdfPCell()
+    dualCell2.addElement(dualList2)
+    dualCell2.border = PdfPCell.NO_BORDER
+    dualCell2.setPadding(0f)
+    dualListTable.addCell(dualCell2)
+
+    //CLOSE
+    val section = Paragraph()
+    //section.add(dualHeader);
+    section.add(dualListTable)
+
+    return section
+}
+
+fun createCombinedParagraphSection(items: kotlin.collections.List<String?>): Paragraph {
+    val stringBuilder = StringBuilder()
+    for (i in items.indices) {
+        stringBuilder.append(items[i])
+        if (i < items.size - 1) {
+            stringBuilder.append(", ")
+        }
+    }
+    val paragraphText = stringBuilder.toString()
+    return Paragraph(paragraphText)
+}
+
+fun splitList(
+    originalList: kotlin.collections.List<String>,
+    listA: MutableList<String>,
+    listB: MutableList<String>
+) {
+    val middle = (originalList.size + 1) / 2
+    listA.addAll(originalList.subList(0, middle))
+    listB.addAll(originalList.subList(middle, originalList.size))
+}

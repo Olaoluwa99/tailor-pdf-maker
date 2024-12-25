@@ -7,15 +7,8 @@ import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.easit.pdfmaker.javaModels.data.CoverLetterItem
-import com.easit.pdfmaker.javaModels.data.EducationItem
-import com.easit.pdfmaker.javaModels.data.ExperienceItem
-import com.easit.pdfmaker.javaModels.data.ProjectItem
-import com.easit.pdfmaker.javaModels.data.ResumeItem
 import com.easit.pdfmaker.kotlinModels.AllResultData
-import com.easit.pdfmaker.kotlinModels.CoverLetterData
 import com.easit.pdfmaker.kotlinModels.PdfMakerUser
-import com.easit.pdfmaker.kotlinModels.ResumeData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -37,7 +30,7 @@ fun serializeUser(data: PdfMakerUser): String{
     return serializedString
 }
 
-fun resumeConverter(item: ResumeData): ResumeItem {
+/*fun resumeConverter(item: ResumeData): ResumeItem {
     val experienceArray = ArrayList<ExperienceItem>()
     val educationArray = ArrayList<EducationItem>()
     val projectArray = ArrayList<ProjectItem>()
@@ -100,9 +93,9 @@ fun resumeConverter(item: ResumeData): ResumeItem {
         item.certificationList,
         item.hobbiesList
     )
-}
+}*/
 
-fun coverLetterConverter(item: CoverLetterData): CoverLetterItem {
+/*fun coverLetterConverter(item: CoverLetterData): CoverLetterItem {
     return CoverLetterItem(
         item.name,
         item.role,
@@ -114,7 +107,7 @@ fun coverLetterConverter(item: CoverLetterData): CoverLetterItem {
         item.mainContent,
         item.closingSalutation
     )
-}
+}*/
 
 fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: String) {
     // Get the Documents directory path for all versions

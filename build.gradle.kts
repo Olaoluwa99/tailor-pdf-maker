@@ -61,13 +61,6 @@ dependencies {
     implementation(libs.pdf.viewer)
     implementation(libs.openpdf)
     implementation(libs.android.awt)
-
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.config)
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.auth.services)
     implementation(libs.kotlinx.coroutines)
     implementation(libs.googleid)
 
