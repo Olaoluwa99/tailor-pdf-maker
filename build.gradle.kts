@@ -65,7 +65,8 @@ dependencies {
     implementation(libs.googleid)
 
     implementation(libs.kotlin.datetime)
-    
+    implementation(libs.androidx.ui.tooling.preview.android)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

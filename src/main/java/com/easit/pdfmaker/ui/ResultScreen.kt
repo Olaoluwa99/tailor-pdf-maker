@@ -67,6 +67,8 @@ import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
 import com.easit.pdfmaker.kotlinModels.makers.CoverLetterMaker
 import com.easit.pdfmaker.kotlinModels.makers.ResumeMaker
 import com.easit.pdfmaker.savePdfToExternalStorage
+import com.easit.pdfmaker.utils.DefaultKeys
+import com.easit.pdfmaker.utils.SelectStyle
 import com.lowagie.text.FontFactory
 import com.lowagie.text.Paragraph
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
@@ -106,10 +108,10 @@ fun ResultScreen(
 
     var outputResumeFile: File? by remember { mutableStateOf(null) }
     var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
-    var isShowingResume by remember { mutableStateOf(true) }
 
     var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, /*Sections.EXPERIENCE,*/ Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
 
+    var buttonHeightDp by remember { mutableStateOf(30.dp) }
     LaunchedEffect (key1 = 0) {
         resultViewModel.setUserItem(
             data = deserializeAllResultData(resultString),
@@ -168,24 +170,17 @@ fun ResultScreen(
         }
     }
 
-
-    val localDensity = LocalDensity.current
-    var buttonHeightDp by remember { mutableStateOf(0.dp) }
-
-    val iconSize by remember { mutableIntStateOf(16) }
-    var actionButtonText by remember { mutableStateOf("Resume") }
-    var nonActionButtonText by remember { mutableStateOf("Cover letter") }
-    var keywordAction by remember { mutableStateOf("View") }
-    var isBottomSheetFull by remember { mutableStateOf(false) }
-    var showKeywordsSection by remember { mutableStateOf(false) }
-    //var buttonSize by remember { mutableStateOf(IntSize.Zero) }
+    //
+    var type by remember { mutableStateOf(StyleType.ALPHA) }
+    var sheetMode by remember { mutableStateOf(SheetMode.DEFAULT) }
+    var isShowingResume by remember { mutableStateOf(true) }
 
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = ((buttonHeightDp * 2) + 80.dp),
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-        sheetSwipeEnabled = false,
+        sheetSwipeEnabled = /*true,*/false,
         sheetDragHandle = null,
         topBar = {
             TopAppBar(
@@ -200,178 +195,45 @@ fun ResultScreen(
             )
         },
         sheetContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Row {
-                    Button(
-                        modifier = Modifier
-                            .weight(1f),
-                        shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(vertical = 16.dp),
-                        onClick = {
-                            if (isShowingResume){
-                                isShowingResume = false
-                                actionButtonText = "Cover letter"
-                                nonActionButtonText = "Resume"
-                            }else{
-                                isShowingResume = true
-                                actionButtonText = "Resume"
-                                nonActionButtonText = "Cover letter"
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.TextSnippet,
-                            contentDescription = "Edit",
-                            modifier = Modifier.size(iconSize.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "View $nonActionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Button(
-                        modifier = Modifier
-                            .weight(1f),
-                        shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(vertical = 16.dp),
-                        onClick = {
+            when (sheetMode) {
+                SheetMode.DEFAULT -> {
+                    DefaultKeys(
+                        keywords = resultViewModel.resultData.collectAsState().value.keywords,
+                        sendSheetPeekHeight = { buttonHeightDp = it },
+                        sendIsShowingResume = { isShowingResume = it },
+                        onEditResume = {},
+                        onEditCoverLetter = {},
+                        onDownloadClicked = {
                             if (isShowingResume){
                                 if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId")
                             }else{
                                 if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId")
                             }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Download,
-                            contentDescription = "Download",
-                            modifier = Modifier.size(iconSize.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Download", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Row {
-                    Button(
-                        modifier = Modifier
-                            .weight(1f),
-                        shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(vertical = 16.dp),
-                        onClick = {
-                            if (isShowingResume){
-                                onEditResume()
-                            }else{
-                                onEditCoverLetter()
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "Edit",
-                            modifier = Modifier.size(iconSize.dp),
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Edit $actionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-                    OutlinedButton(
-                        modifier = Modifier
-                            .weight(1f)
-                            .onGloballyPositioned { coordinates ->
-                                buttonHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-                            },
-                            /*.onGloballyPositioned { layoutCoordinates ->
-                                buttonSize = layoutCoordinates.size
-                            },*/
-                        shape = RoundedCornerShape(50),
-                        contentPadding = PaddingValues(vertical = 16.dp),
-                        onClick = {
+                        },
+                        onFillBottomSheet = {
                             coroutineScope.launch {
-                                if (!isBottomSheetFull){
-                                    showKeywordsSection = true
+                                if (it){
                                     scaffoldState.bottomSheetState.expand()
-                                    keywordAction = "Hide"
-                                    isBottomSheetFull = true
-                                }else {
+                                }else{
                                     scaffoldState.bottomSheetState.partialExpand()
-                                    showKeywordsSection = false
-                                    keywordAction = "View"
-                                    isBottomSheetFull = false
                                 }
                             }
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Key,
-                            contentDescription = "View Keywords",
-                            modifier = Modifier.size(iconSize.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "$keywordAction Keywords", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.primary)
-                    }
+                    )
                 }
-
-                //
-                Spacer(modifier = Modifier.height(48.dp))
-                if/*AnimatedVisibility*/ (showKeywordsSection) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
-                    ) {
-                        Text(
-                            text = "KEYWORDS (${resultViewModel.resultData.collectAsState().value.keywords.size})",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            fontSize = 17.sp,
-                        )
-
-                        FlowRow(
-                            modifier = Modifier
-                                .safeDrawingPadding()
-                                .fillMaxWidth(1f)
-                                //.padding(16.dp)
-                                .wrapContentHeight(align = Alignment.Top),
-                            verticalArrangement = Arrangement.spacedBy(0.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            for(item in resultViewModel.resultData.collectAsState().value.keywords){
-                                ElevatedSuggestionChip(
-                                    label = {
-                                        Text(
-                                            text = item,
-                                            fontSize = MaterialTheme.typography.bodySmall.fontSize
-                                        )
-                                    },
-                                    onClick = { /**/ },
-                                    colors = ChipColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        labelColor = MaterialTheme.colorScheme.background,
-                                        disabledContainerColor = Color.Unspecified,
-                                        disabledLabelColor = Color.Unspecified,
-                                        disabledLeadingIconContentColor = Color.Unspecified,
-                                        disabledTrailingIconContentColor = Color.Unspecified,
-                                        leadingIconContentColor = Color.Unspecified,
-                                        trailingIconContentColor = Color.Unspecified
-                                    )
-                                )
-                            }
+                SheetMode.STYLE -> {
+                    SelectStyle {
+                        type = it
+                        sheetMode = SheetMode.DEFAULT
+                        coroutineScope.launch {
+                            scaffoldState.bottomSheetState.partialExpand()
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(48.dp))
+                SheetMode.SECTION -> { /**/ }
+                SheetMode.UNDERLINE -> { /**/ }
+                SheetMode.SKILLS -> { /**/ }
+                SheetMode.SOFT_SKILLS -> { /**/ }
             }
         },
     ) { innerPadding ->
@@ -387,6 +249,21 @@ fun ResultScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(48.dp))
+
+            Button(onClick = {
+                if (sheetMode == SheetMode.DEFAULT){
+                    sheetMode = SheetMode.STYLE
+                    coroutineScope.launch {
+                        scaffoldState.bottomSheetState.expand()
+                    }
+                }else {
+                    sheetMode = SheetMode.DEFAULT
+                    coroutineScope.launch {
+                        scaffoldState.bottomSheetState.partialExpand()
+                    }
+                }
+            }) { Text("Tester") }
+            Spacer(modifier = Modifier.height(12.dp))
 
             //
             if (hasFilesBeenRetrieved){
@@ -414,6 +291,10 @@ fun ResultScreen(
 
 enum class ThemeColor{
     RED, GREEN, BLACK, BLUE, YELLOW, LIGHT_GRAY, DARK_GRAY
+}
+
+enum class SheetMode{
+    DEFAULT, STYLE, UNDERLINE, SECTION, SKILLS, SOFT_SKILLS
 }
 
 enum class StyleType{
