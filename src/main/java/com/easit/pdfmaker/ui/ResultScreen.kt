@@ -3,37 +3,24 @@ package com.easit.pdfmaker.ui
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.TextSnippet
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
-import androidx.compose.material3.ChipColors
-import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,33 +38,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.easit.pdfmaker.LoadingDialog
 import com.easit.pdfmaker.NavigationIcon
+import com.easit.pdfmaker.R
 import com.easit.pdfmaker.deserializeAllResultData
 import com.easit.pdfmaker.fileToByteArray
 import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
 import com.easit.pdfmaker.kotlinModels.makers.CoverLetterMaker
 import com.easit.pdfmaker.kotlinModels.makers.ResumeMaker
 import com.easit.pdfmaker.savePdfToExternalStorage
+import com.easit.pdfmaker.utils.ColorSelector
 import com.easit.pdfmaker.utils.DefaultKeys
+import com.easit.pdfmaker.utils.ListFormatSheet
+import com.easit.pdfmaker.utils.ResultFixItem
+import com.easit.pdfmaker.utils.ResultSelectionColumn
 import com.easit.pdfmaker.utils.SelectStyle
-import com.lowagie.text.FontFactory
-import com.lowagie.text.Paragraph
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
     isOnlyResume: Boolean,
@@ -98,10 +85,6 @@ fun ResultScreen(
         onReturn()
     }
 
-    //
-    /*var resumeItemFile by remember { mutableStateOf<File?>(null) }
-    var coverLetterItemFile by remember { mutableStateOf<File?>(null) }*/
-
     var resumeItemPath by remember { mutableStateOf("") }
     var coverLetterItemPath by remember { mutableStateOf("") }
     var hasFilesBeenRetrieved by remember { mutableStateOf(false) }
@@ -109,9 +92,33 @@ fun ResultScreen(
     var outputResumeFile: File? by remember { mutableStateOf(null) }
     var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
 
-    var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, /*Sections.EXPERIENCE,*/ Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
+    var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, Sections.EXPERIENCE, Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
+
+    //
+    var skillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var softSkillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var hobbiesFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
+    var showUnderline by remember { mutableStateOf(false) }
+    var progressDialogVisible by remember { mutableStateOf(false) }
 
     var buttonHeightDp by remember { mutableStateOf(30.dp) }
+    var hasReloaded by remember { mutableIntStateOf(0) }
+
+    when (resultViewModel.delayCompleted.collectAsState().value){
+        ReloadState.COMPLETED -> {
+            progressDialogVisible = false
+            Toast.makeText(context, "Here & Now", Toast.LENGTH_SHORT).show()
+            hasReloaded += 1
+            resultViewModel.resetDelay()
+        }
+        ReloadState.ACTIVE -> { /**/ }
+        ReloadState.INITIAL -> { /**/ }
+    }
+
+    //
+    var selectedStyle by remember { mutableStateOf(StyleType.ALPHA) }
+    var selectedThemeColor by remember { mutableStateOf(ThemeColor.BLACK) }
+
     LaunchedEffect (key1 = 0) {
         resultViewModel.setUserItem(
             data = deserializeAllResultData(resultString),
@@ -141,12 +148,14 @@ fun ResultScreen(
                 ResumeMaker(resumeItemPath)
                     .createResume(
                         item = resultViewModel.resultData.value.resume!!,
-                        skillFormatType = "SINGLE-LIST",
-                        softSkillFormatType = "WRAP",
-                        showUnderline = true,
-                        themeColor = ThemeColor.BLACK,
-                        styleType = StyleType.ALPHA,
-                        sectionList = sectionList
+                        skillFormatType = skillFormatType,
+                        softSkillFormatType = softSkillFormatType,
+                        hobbiesFormatType = hobbiesFormatType,
+                        showUnderline = showUnderline,
+                        themeColor = selectedThemeColor,
+                        styleType = selectedStyle,
+                        sectionList = sectionList,
+                        onPdfCreated = { hasFilesBeenRetrieved = true }
                     )
                 //
                 CoverLetterMaker(
@@ -155,7 +164,7 @@ fun ResultScreen(
                     "ALPHA"
                 ).createCoverLetter(resultViewModel.resultData.value.coverLetter!!)
                 Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
-                hasFilesBeenRetrieved = true
+                //hasFilesBeenRetrieved = true
             }catch (io: IOException){
                 println(io.localizedMessage)
                 io.printStackTrace()
@@ -171,9 +180,9 @@ fun ResultScreen(
     }
 
     //
-    var type by remember { mutableStateOf(StyleType.ALPHA) }
     var sheetMode by remember { mutableStateOf(SheetMode.DEFAULT) }
     var isShowingResume by remember { mutableStateOf(true) }
+    var showEditSection by remember { mutableStateOf(false) }
 
 
     BottomSheetScaffold(
@@ -222,68 +231,235 @@ fun ResultScreen(
                     )
                 }
                 SheetMode.STYLE -> {
-                    SelectStyle {
-                        type = it
-                        sheetMode = SheetMode.DEFAULT
-                        coroutineScope.launch {
-                            scaffoldState.bottomSheetState.partialExpand()
+                    SelectStyle(
+                        onDismiss = {
+                            /**/
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        },
+                        onItemSelected = {
+                            selectedStyle = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
                         }
-                    }
+                    )
                 }
-                SheetMode.SECTION -> { /**/ }
-                SheetMode.UNDERLINE -> { /**/ }
-                SheetMode.SKILLS -> { /**/ }
+                SheetMode.SECTION -> { /*TODO*/ }
+                SheetMode.COLOR -> {
+                    ColorSelector(
+                        defaultSelectedColor = selectedThemeColor,
+                        onColorClick = {
+                            selectedThemeColor = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        //hasReloaded += hasReloaded
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
+                SheetMode.SKILLS -> {
+                    ListFormatSheet(
+                        defaultIsSelected = skillFormatType,
+                        onCompleted = {
+                            skillFormatType = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
                 SheetMode.SOFT_SKILLS -> { /**/ }
             }
         },
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = 16.dp,
-                    start = 16.dp,
-                    end = 16.dp
+
+        Row {
+            Box(
+                modifier = Modifier
+                    .weight(1f),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(
+                            top = innerPadding.calculateTopPadding(),
+                            bottom = 16.dp,
+                            start = 8.dp,
+                            end = 8.dp
+                        )
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(36.dp))
+
+                    //
+                    if (hasFilesBeenRetrieved){
+                        if (resumeItemPath.isNotBlank()){
+                            if (isShowingResume){
+                                if (outputResumeFile!!.exists()){
+                                    Box(
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(2.dp)
+                                    ){
+                                        key(hasReloaded){
+                                            PdfRendererViewCompose(
+                                                file = outputResumeFile,
+                                                lifecycleOwner = LocalLifecycleOwner.current
+                                            )
+                                        }
+                                    }
+                                }
+                            }else{
+                                if (outputCoverLetterFile!!.exists()){
+                                    Box(
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(2.dp)
+                                    ){
+                                        PdfRendererViewCompose(
+                                            file = outputCoverLetterFile,
+                                            lifecycleOwner = LocalLifecycleOwner.current
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (!showEditSection){
+                    Box(
+                        modifier = Modifier.padding(top = 36.dp, end = 8.dp)
+                    ){
+                        ResultFixItem(
+                            imageVector = Icons.Default.Visibility,
+                            "Show panel",
+                            onAction = { showEditSection = true }
+                        )
+                    }
+                }
+            }
+
+
+            AnimatedVisibility (showEditSection){
+                Column (
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(end = 8.dp)
+                ){
+                    Spacer(modifier = Modifier.height(36.dp))
+                    ResultSelectionColumn(
+                        onHideClicked = { showEditSection = false },
+                        onStyleClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.STYLE
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onColorClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.COLOR
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onUnderlineClicked = {
+                            progressDialogVisible = true
+                            showUnderline = !showUnderline
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        //hasReloaded += hasReloaded
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onSkillsClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.SKILLS
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onSoftSkillsClicked = { /**/ }
+                    )
+                }
+            }
+        }
+
+        when {
+            progressDialogVisible -> {
+                LoadingDialog(
+                    mainText = stringResource(id = R.string.loading),
+                    onActionCancel = {  }
                 )
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Button(onClick = {
-                if (sheetMode == SheetMode.DEFAULT){
-                    sheetMode = SheetMode.STYLE
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.expand()
-                    }
-                }else {
-                    sheetMode = SheetMode.DEFAULT
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.partialExpand()
-                    }
-                }
-            }) { Text("Tester") }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            //
-            if (hasFilesBeenRetrieved){
-                if (resumeItemPath.isNotBlank()){
-                    if (isShowingResume){
-                        if (outputResumeFile!!.exists()){
-                            PdfRendererViewCompose(
-                                file = outputResumeFile,
-                                lifecycleOwner = LocalLifecycleOwner.current
-                            )
-                        }
-                    }else{
-                        if (outputCoverLetterFile!!.exists()){
-                            PdfRendererViewCompose(
-                                file = outputCoverLetterFile,
-                                lifecycleOwner = LocalLifecycleOwner.current
-                            )
-                        }
-                    }
-                }
             }
         }
     }
@@ -294,7 +470,7 @@ enum class ThemeColor{
 }
 
 enum class SheetMode{
-    DEFAULT, STYLE, UNDERLINE, SECTION, SKILLS, SOFT_SKILLS
+    DEFAULT, STYLE, COLOR, SECTION, SKILLS, SOFT_SKILLS
 }
 
 enum class StyleType{
@@ -303,4 +479,12 @@ enum class StyleType{
 
 enum class Sections{
     OBJECTIVE, EXPERIENCE, EDUCATION, PROJECT, SKILLS, SOFT_SKILLS, CERTIFICATIONS, HOBBIES
+}
+
+enum class ListFormat{
+    FLOW_ROW, SINGLE_COLUMN, DOUBLE_COLUMN, TRIPLE_COLUMN
+}
+
+enum class ReloadState{
+    INITIAL, ACTIVE, COMPLETED
 }

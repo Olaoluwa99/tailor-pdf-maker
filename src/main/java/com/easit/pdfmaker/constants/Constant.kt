@@ -188,5 +188,6 @@ object Constant {
 
     const val DEFAULT_BUILDER_SPACING = 8
 
+    const val SHEET_HEADER_SPACING = 72
 
 }

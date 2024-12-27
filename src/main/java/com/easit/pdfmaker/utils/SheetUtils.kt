@@ -18,21 +18,30 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TextSnippet
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.SevereCold
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -49,15 +58,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -66,14 +78,12 @@ import com.easit.pdfmaker.R
 import com.easit.pdfmaker.constants.Constant
 import com.easit.pdfmaker.fileToByteArray
 import com.easit.pdfmaker.savePdfToExternalStorage
+import com.easit.pdfmaker.ui.ListFormat
 import com.easit.pdfmaker.ui.StyleType
+import com.easit.pdfmaker.ui.ThemeColor
 import kotlinx.coroutines.launch
 
 //TODO - VARIOUS SHEETS FOR RESULT EDITING
-
-/**
- * SHOW UNDERLINE AUTO FROM RESULT SCREEN
- * */
 
 /**
  * DEFAULT BUTTON KEYS
@@ -225,7 +235,9 @@ fun DefaultKeys(
         Spacer(modifier = Modifier.height(48.dp))
         if (showKeywordsSection) {
             Column(
-                modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = "KEYWORDS (${keywords.size})",
@@ -278,7 +290,8 @@ fun DefaultKeys(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectStyle(
-    onItemSelected: (StyleType) -> Unit
+    onItemSelected: (StyleType) -> Unit,
+    onDismiss: () -> Unit
 ) {
 
     var reload by remember { mutableIntStateOf(0) }
@@ -291,24 +304,11 @@ fun SelectStyle(
     Column {
         //
         Column {
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                onClick = {
-                    onItemSelected(selectedStyleType)
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = "Done",
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.background
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = "Completed", color = MaterialTheme.colorScheme.background)
-            }
+            Spacer(modifier = Modifier.height(Constant.SHEET_HEADER_SPACING.dp))
+            ConfirmDismissAction(
+                onConfirm = { onItemSelected(selectedStyleType) },
+                onDismiss = { onDismiss() }
+            )
             Spacer(modifier = Modifier.height(18.dp))
         }
 
@@ -384,6 +384,90 @@ fun SelectStyle(
 /**
  * COLOR
  * */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ColorSelector(
+    defaultSelectedColor: ThemeColor = ThemeColor.BLACK,
+    onColorClick: (ThemeColor) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var reload by remember { mutableIntStateOf(0) }
+    var currentSelectedColor by remember { mutableStateOf(ThemeColor.BLACK) }
+
+    LaunchedEffect(key1 = 0) { currentSelectedColor = defaultSelectedColor }
+
+    //
+    Column {
+        //
+        Column {
+            Spacer(modifier = Modifier.height(Constant.SHEET_HEADER_SPACING.dp))
+            ConfirmDismissAction(
+                onConfirm = { onColorClick(currentSelectedColor) },
+                onDismiss = { onDismiss() }
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+
+        //
+        key (reload) {
+            FlowRow(
+                modifier = Modifier
+                    .safeDrawingPadding()
+                    .fillMaxWidth(1f)
+                    //.padding(16.dp)
+                    .wrapContentHeight(align = Alignment.Top),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.SpaceAround,//spacedBy(8.dp),
+                maxItemsInEachRow = 2
+            ) {
+                for (colorData in colorList){
+                    ColorItem(
+                        data = colorData,
+                        isSelected = colorData.mainColor == currentSelectedColor,
+                        onClick = {
+                            currentSelectedColor = colorData.mainColor
+                            reload += reload
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ColorItem(
+    data: ColorData,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box (
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(if (isSelected) data.tagColor else MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clickable { onClick() }
+            .padding(2.dp)
+    ){
+        Row (
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(data.tagColor)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Box{
+                Text(text = data.name)
+                Text(text = "                     ")
+            }
+        }
+    }
+}
 
 /**
  * SKILLS FORMATTING
@@ -454,7 +538,9 @@ fun ImageItem(
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
@@ -463,6 +549,99 @@ fun ImageItem(
             }
         }
     }
+}
+
+@Composable
+fun ListFormatSheet(
+    defaultIsSelected: ListFormat,
+    onCompleted: (ListFormat)-> Unit,
+    onDismiss: ()-> Unit
+) {
+    //
+    var isSelected by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var reload by remember { mutableIntStateOf(0) }
+    LaunchedEffect(key1 = 0) { isSelected = defaultIsSelected }
+
+
+    //
+    Column{
+        Column {
+            Spacer(modifier = Modifier.height(Constant.SHEET_HEADER_SPACING.dp))
+            ConfirmDismissAction(
+                onConfirm = { onCompleted(isSelected) },
+                onDismiss = { onDismiss() }
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+
+        //
+        key(reload) {
+            LazyColumn (
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ){
+                items(listTypeList.size){
+                    ListTypeItem(
+                        type = listTypeList[it],
+                        isSelected = isSelected == listTypeList[it].tag,
+                        onClick = {
+                            isSelected = listTypeList[it].tag
+                            reload += reload
+                        }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(48.dp))
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ListTypeItem(
+    type: ListTypeData,
+    isSelected: Boolean,
+    onClick: ()-> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh)
+            .padding(2.dp)
+            .clickable { onClick() }
+    ){
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.background)
+                .clickable { onClick() }
+                .padding(8.dp)
+        ) {
+            Text(text = type.title, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .padding(2.dp)
+            ){
+                //
+                Image(
+                    painter = painterResource(id = type.image),
+                    contentDescription = "Image tag",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onClick() }
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+
 }
 
 @Composable
@@ -513,11 +692,117 @@ fun StyleImageFullScreen(
     )
 }
 
+@Composable
+fun ResultSelectionColumn(
+    onHideClicked: ()-> Unit,
+    onStyleClicked: ()-> Unit,
+    onColorClicked: ()-> Unit,
+    onUnderlineClicked: ()-> Unit,
+    onSkillsClicked: ()-> Unit,
+    onSoftSkillsClicked: ()-> Unit,
+){
+    val spacing by remember { mutableStateOf(12.dp) }
+    //
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        //
+        ResultFixItem(
+            imageVector = Icons.Default.VisibilityOff,
+            "Hide panel",
+            onAction = {onHideClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.AutoFixHigh,
+            "Style",
+            onAction = {onStyleClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.Palette,
+            "Color",
+            onAction = {onColorClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.FormatUnderlined,
+            "Underline",
+            onAction = {onUnderlineClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.SevereCold,
+            "Skills",
+            onAction = {onSkillsClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.SevereCold,
+            "Soft skills",
+            onAction = {onSoftSkillsClicked()}
+        )
+    }
+}
+
+@Composable
+fun ResultFixItem(
+    imageVector: ImageVector,
+    title: String,
+    onAction: ()-> Unit
+) {
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .clickable { onAction() }
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ){
+            Icon(
+                imageVector = imageVector,
+                contentDescription = title,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = title,
+            style = LocalTextStyle.current.merge(TextStyle(lineHeight = 1.2.em)),
+            //modifier = Modifier.fillMaxWidth(),
+            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+            overflow = TextOverflow.Ellipsis
+        )
+        //Text(text = title, fontWeight = FontWeight.Light, overflow = TextOverflow.Ellipsis)
+    }
+}
+
 data class ResumeStyle(
     val id: Int,
     val tag: String,
     val title: String,
     val image: Int
+)
+
+data class ListTypeData(
+    val title: String,
+    val tag: ListFormat,
+    val image: Int
+)
+
+val listTypeList = listOf(
+    ListTypeData("Flow Row", ListFormat.FLOW_ROW, R.drawable.list_type1),
+    ListTypeData("Single Column", ListFormat.SINGLE_COLUMN, R.drawable.list_type2),
+    ListTypeData("Double Column", ListFormat.DOUBLE_COLUMN, R.drawable.list_type3),
+    ListTypeData("Triple Column", ListFormat.TRIPLE_COLUMN, R.drawable.list_type4),
 )
 
 val resumeStyleList = listOf(
@@ -528,13 +813,69 @@ val resumeStyleList = listOf(
     ResumeStyle(Constant.STYLE_5, "omegaStyle", "Dual 2", R.drawable.resume_template5),
 )
 
-//@Previ
+data class ColorData(
+    val name: String,
+    val tagColor: Color,
+    val mainColor: ThemeColor
+)
+
+val colorList = listOf(
+    ColorData(name = "Black", tagColor = Color.Black, mainColor = ThemeColor.BLACK),
+    ColorData(name = "Red", tagColor = Color.Red, mainColor = ThemeColor.RED),
+    ColorData(name = "Green", tagColor = Color.Green, mainColor = ThemeColor.GREEN),
+    ColorData(name = "Blue", tagColor = Color.Blue, mainColor = ThemeColor.BLUE),
+    ColorData(name = "Yellow", tagColor = Color.Yellow, mainColor = ThemeColor.YELLOW),
+    ColorData(name = "Light-gray", tagColor = Color.LightGray, mainColor = ThemeColor.LIGHT_GRAY),
+    ColorData(name = "Dark-gray", tagColor = Color.DarkGray, mainColor = ThemeColor.DARK_GRAY)
+)
+
 @Composable
-private fun Matters() {
-    var type by remember { mutableStateOf(StyleType.ALPHA) }
-    MaterialTheme {
-        Column {
-            SelectStyle { type = it }
+fun ConfirmDismissAction(
+    onConfirm: ()-> Unit,
+    onDismiss: ()-> Unit
+) {
+    Row (
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 16.dp),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            onClick = {
+                onConfirm()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = "Done",
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.background
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = "Completed", color = MaterialTheme.colorScheme.background)
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+
+        OutlinedButton(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp),
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            onClick = {
+                onDismiss()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Dismiss",
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(text = "Dismiss", color = MaterialTheme.colorScheme.primary)
         }
     }
 }

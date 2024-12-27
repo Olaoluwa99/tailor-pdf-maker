@@ -403,16 +403,80 @@ fun createDualColumnSection(dualItem: kotlin.collections.List<String>): Paragrap
     return section
 }
 
+fun createTripleColumnSection(tripleItem: kotlin.collections.List<String>): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val listA: MutableList<String> = ArrayList()
+    val listB: MutableList<String> = ArrayList()
+    val listC: MutableList<String> = ArrayList()
+    splitListThree(tripleItem, listA, listB, listC)
+
+    //
+    val dualList1 = List(List.UNORDERED)
+    dualList1.symbolIndent = 12f
+    dualList1.setListSymbol("•")
+    for (i in listA - 1) {
+        dualList1.add(ListItem("  $i", timesNewRomanPlain))
+    }
+    //
+    val dualList2 = List(List.UNORDERED)
+    dualList2.symbolIndent = 12f
+    dualList2.setListSymbol("•")
+    for (i in listB - 1) {
+        dualList2.add(ListItem("  $i", timesNewRomanPlain))
+    }
+    //
+    val dualList3 = List(List.UNORDERED)
+    dualList3.symbolIndent = 12f
+    dualList3.setListSymbol("•")
+    for (i in listC) {
+        dualList3.add(ListItem("  $i", timesNewRomanPlain))
+    }
+
+
+    //-----------------------------------------------------------------------------
+    val dualListTable = PdfPTable(3)
+    dualListTable.headerRows = 0
+    dualListTable.widthPercentage = 100f
+    dualListTable.isSplitLate = false
+    dualListTable.isSplitRows = true
+    //
+    val dualCell1 = PdfPCell()
+    dualCell1.addElement(dualList1)
+    dualCell1.border = PdfPCell.NO_BORDER
+    dualCell1.setPadding(0f)
+    dualListTable.addCell(dualCell1)
+    //
+    val dualCell2 = PdfPCell()
+    dualCell2.addElement(dualList2)
+    dualCell2.border = PdfPCell.NO_BORDER
+    dualCell2.setPadding(0f)
+    dualListTable.addCell(dualCell2)
+    //
+    val dualCell3 = PdfPCell()
+    dualCell3.addElement(dualList3)
+    dualCell3.border = PdfPCell.NO_BORDER
+    dualCell3.setPadding(0f)
+    dualListTable.addCell(dualCell3)
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(dualListTable)
+
+    return section
+}
+
 fun createCombinedParagraphSection(items: kotlin.collections.List<String?>): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
     val stringBuilder = StringBuilder()
     for (i in items.indices) {
-        stringBuilder.append(items[i])
+        stringBuilder.append("•  ${items[i]}")
         if (i < items.size - 1) {
-            stringBuilder.append(", ")
+            stringBuilder.append("  ")
         }
     }
     val paragraphText = stringBuilder.toString()
-    return Paragraph(paragraphText)
+    return Paragraph(paragraphText, timesNewRomanPlain)
 }
 
 fun splitList(
@@ -424,3 +488,19 @@ fun splitList(
     listA.addAll(originalList.subList(0, middle))
     listB.addAll(originalList.subList(middle, originalList.size))
 }
+
+fun splitListThree(
+    originalList: kotlin.collections.List<String>,
+    listA: MutableList<String>,
+    listB: MutableList<String>,
+    listC: MutableList<String>
+) {
+    val size = originalList.size
+    val firstSplit = size / 3
+    val secondSplit = 2 * size / 3
+
+    listA.addAll(originalList.subList(0, firstSplit))
+    listB.addAll(originalList.subList(firstSplit, secondSplit))
+    listC.addAll(originalList.subList(secondSplit, size))
+}
+

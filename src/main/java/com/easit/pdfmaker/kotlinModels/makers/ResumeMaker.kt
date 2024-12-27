@@ -2,6 +2,7 @@ package com.easit.pdfmaker.kotlinModels.makers
 
 import android.util.Log
 import com.easit.pdfmaker.kotlinModels.ResumeData
+import com.easit.pdfmaker.ui.ListFormat
 import com.easit.pdfmaker.ui.Sections
 import com.easit.pdfmaker.ui.StyleType
 import com.easit.pdfmaker.ui.ThemeColor
@@ -19,9 +20,22 @@ import java.util.Objects
 class ResumeMaker(private val path: String){
     private var toShowUnderline = false
     private var color = Color.BLACK
+    private var skillsStyle = ListFormat.FLOW_ROW
+    private var softSkillsStyle = ListFormat.FLOW_ROW
+    private var hobbiesStyle = ListFormat.DOUBLE_COLUMN
     private var mainSectionList: List<Sections> = emptyList()
     //
-    fun createResume(item: ResumeData, skillFormatType: String, softSkillFormatType: String, showUnderline: Boolean, themeColor: ThemeColor, styleType: StyleType, sectionList: List<Sections>){
+    fun createResume(
+        item: ResumeData,
+        skillFormatType: ListFormat,
+        softSkillFormatType: ListFormat,
+        hobbiesFormatType: ListFormat,
+        showUnderline: Boolean,
+        themeColor: ThemeColor,
+        styleType: StyleType,
+        sectionList: List<Sections>,
+        onPdfCreated: () -> Unit
+    ){
         toShowUnderline = showUnderline
         mainSectionList = sectionList
 
@@ -35,8 +49,12 @@ class ResumeMaker(private val path: String){
             ThemeColor.LIGHT_GRAY -> Color.LIGHT_GRAY
         }
 
+        skillsStyle = skillFormatType
+        softSkillsStyle = softSkillFormatType
+        hobbiesStyle = hobbiesFormatType
+
         when (styleType){
-            StyleType.ALPHA -> createTypeAlpha(item)
+            StyleType.ALPHA -> createTypeAlpha(item, onPdfCreated)
             StyleType.BETA -> createTypeBeta()
             StyleType.DELTA -> createTypeDelta()
             StyleType.GAMMA -> createTypeGamma()
@@ -44,7 +62,7 @@ class ResumeMaker(private val path: String){
         }
     }
 
-    private fun createTypeAlpha(item: ResumeData){
+    private fun createTypeAlpha(item: ResumeData, onPdfCreated: () -> Unit){
         val document = Document(PageSize.A4)
         val multiItemSpacing = 10f //5f;
         val headerSpacingAfter = 7.5f
@@ -122,14 +140,16 @@ class ResumeMaker(private val path: String){
                         document.add(skillsHeader)
                     }
 
-                    var isLong = false
+                    /*var isLong = false
                     for (i in item.skillsList) {
                         isLong = i.length > 24
-                    }
-                    if (isLong) {
-                        document.add(createSingleColumnSection(item.skillsList))
-                    } else {
-                        document.add(createDualColumnSection(item.skillsList))
+                    }*/
+
+                    when (skillsStyle){
+                        ListFormat.FLOW_ROW -> document.add(createCombinedParagraphSection(item.skillsList))
+                        ListFormat.SINGLE_COLUMN -> document.add(createSingleColumnSection(item.skillsList))
+                        ListFormat.DOUBLE_COLUMN -> document.add(createDualColumnSection(item.skillsList))
+                        ListFormat.TRIPLE_COLUMN -> document.add(createTripleColumnSection(item.skillsList))
                     }
                 }
             }
@@ -146,7 +166,13 @@ class ResumeMaker(private val path: String){
                         softSkillsHeader.spacingBefore = headerSpacingBefore
                         document.add(softSkillsHeader)
                     }
-                    document.add(createDualColumnSection(item.softSkillsList))
+                    when (softSkillsStyle){
+                        ListFormat.FLOW_ROW -> document.add(createCombinedParagraphSection(item.softSkillsList))
+                        ListFormat.SINGLE_COLUMN -> document.add(createSingleColumnSection(item.softSkillsList))
+                        ListFormat.DOUBLE_COLUMN -> document.add(createDualColumnSection(item.softSkillsList))
+                        ListFormat.TRIPLE_COLUMN -> document.add(createTripleColumnSection(item.softSkillsList))
+                    }
+                    //document.add(createDualColumnSection(item.softSkillsList))
                 }
             }
 
@@ -224,7 +250,13 @@ class ResumeMaker(private val path: String){
                         document.add(hobbiesHeader)
                     }
                     //
-                    document.add(createDualColumnSection(item.hobbiesList))
+                    //document.add(createDualColumnSection(item.hobbiesList))
+                    when (hobbiesStyle){
+                        ListFormat.FLOW_ROW -> document.add(createCombinedParagraphSection(item.hobbiesList))
+                        ListFormat.SINGLE_COLUMN -> document.add(createSingleColumnSection(item.hobbiesList))
+                        ListFormat.DOUBLE_COLUMN -> document.add(createDualColumnSection(item.hobbiesList))
+                        ListFormat.TRIPLE_COLUMN -> document.add(createTripleColumnSection(item.hobbiesList))
+                    }
                 }
             }
         } catch (de: DocumentException) {
@@ -235,6 +267,9 @@ class ResumeMaker(private val path: String){
             Log.e("Error - IO", de.message ?: "")
         }
         document.close()
+
+        //Callback
+        onPdfCreated()
     }
 
     private fun createTypeBeta(){
