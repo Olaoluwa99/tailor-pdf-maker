@@ -1,8 +1,8 @@
-package com.easit.pdfmaker.kotlinModels.makers
+package com.easit.pdfmaker.models
 
-import com.easit.pdfmaker.kotlinModels.EducationItem
-import com.easit.pdfmaker.kotlinModels.ExperienceItem
-import com.easit.pdfmaker.kotlinModels.ProjectItem
+import com.easit.pdfmaker.data.EducationItem
+import com.easit.pdfmaker.data.ExperienceItem
+import com.easit.pdfmaker.data.ProjectItem
 import com.lowagie.text.Anchor
 import com.lowagie.text.Chunk
 import com.lowagie.text.Document
@@ -27,7 +27,8 @@ fun createContactDetailsSection(
     iLocation: String?,
     iLinkCover1: String?, iLinkCover2: String?,
     iLink1: String?, iLink2: String?,
-    isSplitLink: Boolean?
+    isSplitLink: Boolean?,
+    linkColor: Color
 ): Paragraph {
     val timesNewRomanName = FontFactory.getFont(FontFactory.TIMES_BOLD, 24f)
     val timesNewRomanRole = FontFactory.getFont(FontFactory.TIMES, 16f)
@@ -36,7 +37,7 @@ fun createContactDetailsSection(
         FontFactory.TIMES,
         12f,
         Font.UNDERLINE,
-        Color(0, 0, 255)
+        linkColor
     ) // Blue color for hyperlink
 
     //
@@ -109,10 +110,10 @@ fun createHalfContactSection(
     iPhone: String?, iEmail: String,
     iLocation: String?,
     iLinkCover1: String?, iLinkCover2: String?,
-    iLink1: String?, iLink2: String?
+    iLink1: String?, iLink2: String?, linkColor: Color
 ): Paragraph {
     val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
-    val linkFont = FontFactory.getFont(FontFactory.TIMES, 12f, Font.UNDERLINE, Color(0, 0, 255))
+    val linkFont = FontFactory.getFont(FontFactory.TIMES, 12f, Font.UNDERLINE, linkColor)
 
     //
     val emailLink = Anchor(iEmail, linkFont)

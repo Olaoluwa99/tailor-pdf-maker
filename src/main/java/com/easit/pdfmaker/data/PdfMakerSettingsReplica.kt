@@ -1,4 +1,4 @@
-package com.easit.pdfmaker.kotlinModels
+package com.easit.pdfmaker.data
 
 data class PdfMakerSettingsReplica(
     val viewMode: Boolean = true,

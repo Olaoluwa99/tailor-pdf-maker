@@ -1,4 +1,4 @@
-package com.easit.pdfmaker.kotlinModels;
+package com.easit.pdfmaker.models;
 
 public class OldJavaMakeResume {
     /*private final String mPath;

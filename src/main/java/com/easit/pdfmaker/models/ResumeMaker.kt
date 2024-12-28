@@ -1,11 +1,11 @@
-package com.easit.pdfmaker.kotlinModels.makers
+package com.easit.pdfmaker.models
 
 import android.util.Log
-import com.easit.pdfmaker.kotlinModels.ResumeData
-import com.easit.pdfmaker.ui.ListFormat
-import com.easit.pdfmaker.ui.Sections
-import com.easit.pdfmaker.ui.StyleType
-import com.easit.pdfmaker.ui.ThemeColor
+import com.easit.pdfmaker.data.ListFormat
+import com.easit.pdfmaker.data.ResumeData
+import com.easit.pdfmaker.data.Sections
+import com.easit.pdfmaker.data.StyleType
+import com.easit.pdfmaker.data.ThemeColor
 import com.lowagie.text.Document
 import com.lowagie.text.DocumentException
 import com.lowagie.text.Element
@@ -15,11 +15,11 @@ import java.awt.Color
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.Objects
 
 class ResumeMaker(private val path: String){
     private var toShowUnderline = false
-    private var color = Color.BLACK
+    private var mainThemeColor = Color.BLACK
+    private var mainLinkColor = Color.BLUE
     private var skillsStyle = ListFormat.FLOW_ROW
     private var softSkillsStyle = ListFormat.FLOW_ROW
     private var hobbiesStyle = ListFormat.DOUBLE_COLUMN
@@ -32,6 +32,7 @@ class ResumeMaker(private val path: String){
         hobbiesFormatType: ListFormat,
         showUnderline: Boolean,
         themeColor: ThemeColor,
+        linkColor: ThemeColor,
         styleType: StyleType,
         sectionList: List<Sections>,
         onPdfCreated: () -> Unit
@@ -39,7 +40,17 @@ class ResumeMaker(private val path: String){
         toShowUnderline = showUnderline
         mainSectionList = sectionList
 
-        color = when (themeColor){
+        mainThemeColor = when (themeColor){
+            ThemeColor.RED -> Color.RED
+            ThemeColor.GREEN -> Color.GREEN
+            ThemeColor.BLACK -> Color.BLACK
+            ThemeColor.BLUE -> Color.BLUE
+            ThemeColor.YELLOW -> Color.YELLOW
+            ThemeColor.DARK_GRAY -> Color.DARK_GRAY
+            ThemeColor.LIGHT_GRAY -> Color.LIGHT_GRAY
+        }
+
+        mainLinkColor = when (linkColor){
             ThemeColor.RED -> Color.RED
             ThemeColor.GREEN -> Color.GREEN
             ThemeColor.BLACK -> Color.BLACK
@@ -81,7 +92,7 @@ class ResumeMaker(private val path: String){
                 item.name, item.role, item.phone,
                 item.email, item.location,
                 item.linkCover1, item.linkCover2,
-                item.link1, item.link2, false
+                item.link1, item.link2, false, mainLinkColor
             )
             contactItem.setAlignment("Center")
             document.add(contactItem)
@@ -90,7 +101,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.OBJECTIVE)){
                 if (item.objective != null) {
                     if (toShowUnderline){
-                        val objectiveHeader =  createHeaderWithHorizontalLine("OBJECTIVE", color)
+                        val objectiveHeader =  createHeaderWithHorizontalLine("OBJECTIVE", mainThemeColor)
                         objectiveHeader.spacingBefore = headerSpacingBefore
                         document.add(objectiveHeader)
                     }else {
@@ -110,7 +121,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.EXPERIENCE)){
                 if (item.experienceList != null) {
                     if (toShowUnderline){
-                        val experienceHeader =  createHeaderWithHorizontalLine("EXPERIENCE", color)
+                        val experienceHeader =  createHeaderWithHorizontalLine("EXPERIENCE", mainThemeColor)
                         experienceHeader.spacingBefore = headerSpacingBefore
                         document.add(experienceHeader)
                     }else {
@@ -131,7 +142,7 @@ class ResumeMaker(private val path: String){
                 if (item.skillsList.isNotEmpty()) {
                     //val skillsHeader = createHeader("TECHNICAL SKILLS")
                     if (toShowUnderline){
-                        val skillsHeader =  createHeaderWithHorizontalLine("TECHNICAL SKILLS", color)
+                        val skillsHeader =  createHeaderWithHorizontalLine("TECHNICAL SKILLS", mainThemeColor)
                         skillsHeader.spacingBefore = headerSpacingBefore
                         document.add(skillsHeader)
                     }else {
@@ -158,7 +169,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.SOFT_SKILLS)){
                 if (item.softSkillsList != null) {
                     if (toShowUnderline){
-                        val softSkillsHeader =  createHeaderWithHorizontalLine("SOFT SKILLS", color)
+                        val softSkillsHeader =  createHeaderWithHorizontalLine("SOFT SKILLS", mainThemeColor)
                         softSkillsHeader.spacingBefore = headerSpacingBefore
                         document.add(softSkillsHeader)
                     }else {
@@ -180,7 +191,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.EDUCATION)){
                 if (item.educationList != null) {
                     if (toShowUnderline){
-                        val educationHeader =  createHeaderWithHorizontalLine("EDUCATION", color)
+                        val educationHeader =  createHeaderWithHorizontalLine("EDUCATION", mainThemeColor)
                         educationHeader.spacingBefore = headerSpacingBefore
                         document.add(educationHeader)
                     }else {
@@ -202,7 +213,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.PROJECT)){
                 if (item.projectList != null) {
                     if (toShowUnderline){
-                        val projectsHeader =  createHeaderWithHorizontalLine("PROJECTS", color)
+                        val projectsHeader =  createHeaderWithHorizontalLine("PROJECTS", mainThemeColor)
                         projectsHeader.spacingBefore = headerSpacingBefore
                         document.add(projectsHeader)
                     }else {
@@ -224,7 +235,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.CERTIFICATIONS)){
                 if (item.certificationList != null) {
                     if (toShowUnderline){
-                        val certificationsHeader =  createHeaderWithHorizontalLine("CERTIFICATIONS", color)
+                        val certificationsHeader =  createHeaderWithHorizontalLine("CERTIFICATIONS", mainThemeColor)
                         certificationsHeader.spacingBefore = headerSpacingBefore
                         document.add(certificationsHeader)
                     }else {
@@ -241,7 +252,7 @@ class ResumeMaker(private val path: String){
             if (mainSectionList.contains(Sections.HOBBIES)){
                 if (item.hobbiesList != null) {
                     if (toShowUnderline){
-                        val hobbiesHeader =  createHeaderWithHorizontalLine("HOBBIES", color)
+                        val hobbiesHeader =  createHeaderWithHorizontalLine("HOBBIES", mainThemeColor)
                         hobbiesHeader.spacingBefore = headerSpacingBefore
                         document.add(hobbiesHeader)
                     }else {

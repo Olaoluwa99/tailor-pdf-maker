@@ -46,17 +46,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.easit.pdfmaker.LoadingDialog
 import com.easit.pdfmaker.NavigationIcon
 import com.easit.pdfmaker.R
+import com.easit.pdfmaker.data.ListFormat
 import com.easit.pdfmaker.deserializeAllResultData
 import com.easit.pdfmaker.fileToByteArray
-import com.easit.pdfmaker.kotlinModels.PdfMakerSettingsReplica
-import com.easit.pdfmaker.kotlinModels.makers.CoverLetterMaker
-import com.easit.pdfmaker.kotlinModels.makers.ResumeMaker
+import com.easit.pdfmaker.data.PdfMakerSettingsReplica
+import com.easit.pdfmaker.data.ReloadState
+import com.easit.pdfmaker.data.Sections
+import com.easit.pdfmaker.data.SheetMode
+import com.easit.pdfmaker.data.StyleType
+import com.easit.pdfmaker.data.ThemeColor
+import com.easit.pdfmaker.models.CoverLetterMaker
+import com.easit.pdfmaker.models.ResumeMaker
 import com.easit.pdfmaker.savePdfToExternalStorage
 import com.easit.pdfmaker.utils.ColorSelector
 import com.easit.pdfmaker.utils.DefaultKeys
 import com.easit.pdfmaker.utils.ListFormatSheet
 import com.easit.pdfmaker.utils.ResultFixItem
 import com.easit.pdfmaker.utils.ResultSelectionColumn
+import com.easit.pdfmaker.utils.SelectSections
 import com.easit.pdfmaker.utils.SelectStyle
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
@@ -98,7 +105,7 @@ fun ResultScreen(
     var skillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
     var softSkillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
     var hobbiesFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
-    var showUnderline by remember { mutableStateOf(false) }
+    var showUnderline by remember { mutableStateOf(true) }
     var progressDialogVisible by remember { mutableStateOf(false) }
 
     var buttonHeightDp by remember { mutableStateOf(30.dp) }
@@ -118,6 +125,7 @@ fun ResultScreen(
     //
     var selectedStyle by remember { mutableStateOf(StyleType.ALPHA) }
     var selectedThemeColor by remember { mutableStateOf(ThemeColor.BLACK) }
+    var selectedLinkColor by remember { mutableStateOf(ThemeColor.BLUE) }
 
     LaunchedEffect (key1 = 0) {
         resultViewModel.setUserItem(
@@ -153,6 +161,7 @@ fun ResultScreen(
                         hobbiesFormatType = hobbiesFormatType,
                         showUnderline = showUnderline,
                         themeColor = selectedThemeColor,
+                        linkColor = selectedLinkColor,
                         styleType = selectedStyle,
                         sectionList = sectionList,
                         onPdfCreated = { hasFilesBeenRetrieved = true }
@@ -250,7 +259,43 @@ fun ResultScreen(
                         }
                     )
                 }
-                SheetMode.SECTION -> { /*TODO*/ }
+                SheetMode.SECTION -> {
+                    SelectSections(
+                        defaultSectionList = sectionList,
+                        onConfirm = {
+                            sectionList = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        //hasReloaded += hasReloaded
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
                 SheetMode.COLOR -> {
                     ColorSelector(
                         defaultSelectedColor = selectedThemeColor,
@@ -270,6 +315,44 @@ fun ResultScreen(
                                     hobbiesFormatType = hobbiesFormatType,
                                     showUnderline = showUnderline,
                                     themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        //hasReloaded += hasReloaded
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
+                SheetMode.LINK_COLOR -> {
+                    ColorSelector(
+                        defaultSelectedColor = selectedLinkColor,
+                        onColorClick = {
+                            selectedLinkColor = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
                                     styleType = selectedStyle,
                                     sectionList = sectionList,
                                     onPdfCreated = {
@@ -306,6 +389,7 @@ fun ResultScreen(
                                     hobbiesFormatType = hobbiesFormatType,
                                     showUnderline = showUnderline,
                                     themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
                                     styleType = selectedStyle,
                                     sectionList = sectionList,
                                     onPdfCreated = {
@@ -322,7 +406,78 @@ fun ResultScreen(
                         }
                     )
                 }
-                SheetMode.SOFT_SKILLS -> { /**/ }
+                SheetMode.SOFT_SKILLS -> {
+                    ListFormatSheet(
+                        defaultIsSelected = skillFormatType,
+                        onCompleted = {
+                            softSkillFormatType = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
+                SheetMode.HOBBIES -> {
+                    ListFormatSheet(
+                        defaultIsSelected = skillFormatType,
+                        onCompleted = {
+                            hobbiesFormatType = it
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                            progressDialogVisible = true
+                            ResumeMaker(resumeItemPath)
+                                .createResume(
+                                    item = resultViewModel.resultData.value.resume!!,
+                                    skillFormatType = skillFormatType,
+                                    softSkillFormatType = softSkillFormatType,
+                                    hobbiesFormatType = hobbiesFormatType,
+                                    showUnderline = showUnderline,
+                                    themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
+                                    styleType = selectedStyle,
+                                    sectionList = sectionList,
+                                    onPdfCreated = {
+                                        resultViewModel.delayTimer(5000)
+                                    }
+                                )
+                        },
+                        onDismiss = {
+                            sheetMode = SheetMode.DEFAULT
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            showEditSection = true
+                        }
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -415,9 +570,23 @@ fun ResultScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
+                        onSectionsClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.SECTION
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
                         onColorClicked = {
                             showEditSection = false
                             sheetMode = SheetMode.COLOR
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onLinkColorClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.LINK_COLOR
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
@@ -433,6 +602,7 @@ fun ResultScreen(
                                     hobbiesFormatType = hobbiesFormatType,
                                     showUnderline = showUnderline,
                                     themeColor = selectedThemeColor,
+                                    linkColor = selectedLinkColor,
                                     styleType = selectedStyle,
                                     sectionList = sectionList,
                                     onPdfCreated = {
@@ -448,7 +618,20 @@ fun ResultScreen(
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
-                        onSoftSkillsClicked = { /**/ }
+                        onSoftSkillsClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.SOFT_SKILLS
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onHobbiesClicked = {
+                            showEditSection = false
+                            sheetMode = SheetMode.HOBBIES
+                            coroutineScope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        }
                     )
                 }
             }
@@ -463,28 +646,4 @@ fun ResultScreen(
             }
         }
     }
-}
-
-enum class ThemeColor{
-    RED, GREEN, BLACK, BLUE, YELLOW, LIGHT_GRAY, DARK_GRAY
-}
-
-enum class SheetMode{
-    DEFAULT, STYLE, COLOR, SECTION, SKILLS, SOFT_SKILLS
-}
-
-enum class StyleType{
-    ALPHA, BETA, DELTA, GAMMA, OMEGA
-}
-
-enum class Sections{
-    OBJECTIVE, EXPERIENCE, EDUCATION, PROJECT, SKILLS, SOFT_SKILLS, CERTIFICATIONS, HOBBIES
-}
-
-enum class ListFormat{
-    FLOW_ROW, SINGLE_COLUMN, DOUBLE_COLUMN, TRIPLE_COLUMN
-}
-
-enum class ReloadState{
-    INITIAL, ACTIVE, COMPLETED
 }

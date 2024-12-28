@@ -1,7 +1,7 @@
-package com.easit.pdfmaker.kotlinModels.makers
+package com.easit.pdfmaker.models
 
 import android.util.Log
-import com.easit.pdfmaker.kotlinModels.CoverLetterData
+import com.easit.pdfmaker.data.CoverLetterData
 import com.lowagie.text.Document
 import com.lowagie.text.DocumentException
 import com.lowagie.text.Element
@@ -10,7 +10,6 @@ import com.lowagie.text.pdf.PdfWriter
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.Objects
 
 class CoverLetterMaker(
     private val path: String,

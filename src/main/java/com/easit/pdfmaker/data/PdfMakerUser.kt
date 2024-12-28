@@ -1,4 +1,4 @@
-package com.easit.pdfmaker.kotlinModels
+package com.easit.pdfmaker.data
 
 import androidx.annotation.Keep
 import kotlinx.serialization.Serializable

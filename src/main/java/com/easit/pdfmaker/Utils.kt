@@ -7,8 +7,8 @@ import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.easit.pdfmaker.kotlinModels.AllResultData
-import com.easit.pdfmaker.kotlinModels.PdfMakerUser
+import com.easit.pdfmaker.data.AllResultData
+import com.easit.pdfmaker.data.PdfMakerUser
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File

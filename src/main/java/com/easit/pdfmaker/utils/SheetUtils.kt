@@ -1,10 +1,6 @@
 package com.easit.pdfmaker.utils
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -24,15 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.TextSnippet
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FormatUnderlined
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.filled.FreeBreakfast
+import androidx.compose.material.icons.filled.InsertPageBreak
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SevereCold
@@ -41,13 +36,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ChipColors
 import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,34 +49,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.zIndex
 import com.easit.pdfmaker.R
 import com.easit.pdfmaker.constants.Constant
-import com.easit.pdfmaker.fileToByteArray
-import com.easit.pdfmaker.savePdfToExternalStorage
-import com.easit.pdfmaker.ui.ListFormat
-import com.easit.pdfmaker.ui.StyleType
-import com.easit.pdfmaker.ui.ThemeColor
-import kotlinx.coroutines.launch
-
-//TODO - VARIOUS SHEETS FOR RESULT EDITING
+import com.easit.pdfmaker.data.ListFormat
+import com.easit.pdfmaker.data.Sections
+import com.easit.pdfmaker.data.StyleType
+import com.easit.pdfmaker.data.ThemeColor
+import com.easit.pdfmaker.data.allSectionList
+import com.easit.pdfmaker.data.colorList
+import com.easit.pdfmaker.data.listTypeList
+import com.easit.pdfmaker.data.resumeStyleList
 
 /**
  * DEFAULT BUTTON KEYS
@@ -285,6 +269,100 @@ fun DefaultKeys(
 }
 
 /**
+ * SECTIONS
+ * */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SelectSections(
+    defaultSectionList: List<Sections>,
+    onConfirm: (List<Sections>) -> Unit,
+    onDismiss: () -> Unit
+) {
+
+    var reload by remember { mutableIntStateOf(0) }
+    var currentSectionList by remember { mutableStateOf(mutableListOf<Sections>()) }
+
+    LaunchedEffect(key1 = 0) { currentSectionList = defaultSectionList.toMutableList() }
+
+    //
+    Column {
+        //
+        Column {
+            Spacer(modifier = Modifier.height(Constant.SHEET_HEADER_SPACING.dp))
+            ConfirmDismissAction(
+                onConfirm = { onConfirm(currentSectionList) },
+                onDismiss = { onDismiss() }
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+
+        //
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            key(reload) {
+                LazyColumn (
+                    modifier = Modifier.padding(16.dp),
+                    //verticalArrangement = Arrangement.spacedBy(12.dp)
+                ){
+                    items(allSectionList.size){
+                        key(reload) {
+                            SectionItem(
+                                title = allSectionList[it].tag,
+                                defaultIsChecked = currentSectionList.contains(allSectionList[it].section),
+                                onCheckedChange = {
+                                    val item = allSectionList[it].section
+                                    if (currentSectionList.contains(item)){
+                                        currentSectionList.remove(item)
+                                    }else {
+                                        currentSectionList.add(item)
+                                    }
+                                    reload += reload
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(48.dp))
+                    }
+                }
+
+                /*FlowRow(
+                    modifier = Modifier
+                        .safeDrawingPadding()
+                        .fillMaxWidth(1f)
+                        //.padding(16.dp)
+                        .wrapContentHeight(align = Alignment.Top),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,//spacedBy(8.dp),
+                    maxItemsInEachRow = 2
+                ) {
+                    //
+                    for (mainItem in allSectionList){
+                        SectionItem(
+                            title = mainItem.tag,
+                            isChecked = currentSectionList.contains(mainItem.section),
+                            onCheckedChange = {
+                                val item = mainItem.section
+                                if (currentSectionList.contains(item)){
+                                    currentSectionList.remove(item)
+                                    reload += reload
+                                }else {
+                                    currentSectionList.add(item)
+                                    reload += reload
+                                }
+                            }
+                        )
+                    }
+                }*/
+            }
+        }
+    }
+}
+
+/**
  * STYLE
  * */
 @OptIn(ExperimentalLayoutApi::class)
@@ -435,122 +513,9 @@ fun ColorSelector(
     }
 }
 
-@Composable
-fun ColorItem(
-    data: ColorData,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box (
-        modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(if (isSelected) data.tagColor else MaterialTheme.colorScheme.surfaceContainerHigh)
-            .clickable { onClick() }
-            .padding(2.dp)
-    ){
-        Row (
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(data.tagColor)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Box{
-                Text(text = data.name)
-                Text(text = "                     ")
-            }
-        }
-    }
-}
-
 /**
- * SKILLS FORMATTING
+ * LIST FORMATTING
  * */
-
-/**
- * SOFT SKILLS FORMATTING
- * */
-
-@Composable
-fun ImageItem(
-    imageId: Int,
-    typeName: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onFillScreen: () -> Unit
-) {
-    val selectedColor = MaterialTheme.colorScheme.primary
-    val unSelectedColor = MaterialTheme.colorScheme.background
-    var color by remember { mutableStateOf(unSelectedColor) }
-    when {
-        isSelected -> color = selectedColor
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(0.45f)
-            .background(color)
-            .padding(2.dp)
-            .clickable {
-                //color = selectedColor
-                onClick()
-            },
-        contentAlignment = Alignment.BottomEnd
-    ){
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                Image(
-                    painter = painterResource(id = imageId),
-                    contentDescription = "Image tag",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onClick() }
-                )
-
-                //Floating Box
-                Box(
-                    modifier = Modifier.padding(8.dp)
-                ){
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(MaterialTheme.colorScheme.primary/*Constant.BROWN*/)
-                            .clickable { onFillScreen() }
-                            .padding(4.dp)
-                    ){
-                        Icon(
-                            imageVector = Icons.Filled.Fullscreen,
-                            contentDescription = "Fill screen",
-                            tint = MaterialTheme.colorScheme.background/*Color.White*/
-                        )
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(text = typeName, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
-    }
-}
-
 @Composable
 fun ListFormatSheet(
     defaultIsSelected: ListFormat,
@@ -599,107 +564,20 @@ fun ListFormatSheet(
     }
 }
 
-
-@Composable
-fun ListTypeItem(
-    type: ListTypeData,
-    isSelected: Boolean,
-    onClick: ()-> Unit
-) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(2.dp)
-            .clickable { onClick() }
-    ){
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.background)
-                .clickable { onClick() }
-                .padding(8.dp)
-        ) {
-            Text(text = type.title, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(2.dp)
-            ){
-                //
-                Image(
-                    painter = painterResource(id = type.image),
-                    contentDescription = "Image tag",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onClick() }
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-
-}
-
-@Composable
-fun StyleImageFullScreen(
-    imageId: Int,
-    onDismiss: ()-> Unit
-) {
-    Dialog(
-        onDismissRequest = { onDismiss() },
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        content = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(16.dp)
-                    .zIndex(10F),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                Image(
-                    painter = painterResource(id = imageId),
-                    contentDescription = "Resume Image",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                //Floating Box
-                Box(
-                    modifier = Modifier.padding(12.dp)
-                ){
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(MaterialTheme.colorScheme.primary/*Constant.BROWN*/)
-                            .clickable { onDismiss() }
-                            .padding(4.dp)
-                    ){
-                        Icon(
-                            imageVector = Icons.Filled.FullscreenExit,
-                            contentDescription = "Exit full screen",
-                            tint = MaterialTheme.colorScheme.background/*Color.White*/
-                        )
-                    }
-                }
-            }
-        },
-    )
-}
-
+/**
+ * RESULT COLUMN
+ * */
 @Composable
 fun ResultSelectionColumn(
     onHideClicked: ()-> Unit,
     onStyleClicked: ()-> Unit,
     onColorClicked: ()-> Unit,
+    onLinkColorClicked: ()-> Unit,
     onUnderlineClicked: ()-> Unit,
     onSkillsClicked: ()-> Unit,
     onSoftSkillsClicked: ()-> Unit,
+    onHobbiesClicked: ()-> Unit,
+    onSectionsClicked: ()-> Unit,
 ){
     val spacing by remember { mutableStateOf(12.dp) }
     //
@@ -715,6 +593,13 @@ fun ResultSelectionColumn(
         Spacer(modifier = Modifier.height(spacing))
 
         ResultFixItem(
+            imageVector = Icons.Default.InsertPageBreak,
+            "Sections",
+            onAction = {onSectionsClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
             imageVector = Icons.Default.AutoFixHigh,
             "Style",
             onAction = {onStyleClicked()}
@@ -725,6 +610,13 @@ fun ResultSelectionColumn(
             imageVector = Icons.Default.Palette,
             "Color",
             onAction = {onColorClicked()}
+        )
+        Spacer(modifier = Modifier.height(spacing))
+
+        ResultFixItem(
+            imageVector = Icons.Default.Palette,
+            "Link Color",
+            onAction = {onLinkColorClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
 
@@ -747,88 +639,19 @@ fun ResultSelectionColumn(
             "Soft skills",
             onAction = {onSoftSkillsClicked()}
         )
-    }
-}
+        Spacer(modifier = Modifier.height(spacing))
 
-@Composable
-fun ResultFixItem(
-    imageVector: ImageVector,
-    title: String,
-    onAction: ()-> Unit
-) {
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .clickable { onAction() }
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ){
-            Icon(
-                imageVector = imageVector,
-                contentDescription = title,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = title,
-            style = LocalTextStyle.current.merge(TextStyle(lineHeight = 1.2.em)),
-            //modifier = Modifier.fillMaxWidth(),
-            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-            overflow = TextOverflow.Ellipsis
+        ResultFixItem(
+            imageVector = Icons.Default.FreeBreakfast,
+            "Hobbies",
+            onAction = {onHobbiesClicked()}
         )
-        //Text(text = title, fontWeight = FontWeight.Light, overflow = TextOverflow.Ellipsis)
     }
 }
 
-data class ResumeStyle(
-    val id: Int,
-    val tag: String,
-    val title: String,
-    val image: Int
-)
-
-data class ListTypeData(
-    val title: String,
-    val tag: ListFormat,
-    val image: Int
-)
-
-val listTypeList = listOf(
-    ListTypeData("Flow Row", ListFormat.FLOW_ROW, R.drawable.list_type1),
-    ListTypeData("Single Column", ListFormat.SINGLE_COLUMN, R.drawable.list_type2),
-    ListTypeData("Double Column", ListFormat.DOUBLE_COLUMN, R.drawable.list_type3),
-    ListTypeData("Triple Column", ListFormat.TRIPLE_COLUMN, R.drawable.list_type4),
-)
-
-val resumeStyleList = listOf(
-    ResumeStyle(Constant.STYLE_1, "alphaStyle", "Modern", R.drawable.resume_template1),
-    ResumeStyle(Constant.STYLE_2, "betaStyle", "Real", R.drawable.resume_template2),
-    ResumeStyle(Constant.STYLE_3, "deltaStyle", "Fine", R.drawable.resume_template3),
-    ResumeStyle(Constant.STYLE_4, "gammaStyle", "Dual 1", R.drawable.resume_template4),
-    ResumeStyle(Constant.STYLE_5, "omegaStyle", "Dual 2", R.drawable.resume_template5),
-)
-
-data class ColorData(
-    val name: String,
-    val tagColor: Color,
-    val mainColor: ThemeColor
-)
-
-val colorList = listOf(
-    ColorData(name = "Black", tagColor = Color.Black, mainColor = ThemeColor.BLACK),
-    ColorData(name = "Red", tagColor = Color.Red, mainColor = ThemeColor.RED),
-    ColorData(name = "Green", tagColor = Color.Green, mainColor = ThemeColor.GREEN),
-    ColorData(name = "Blue", tagColor = Color.Blue, mainColor = ThemeColor.BLUE),
-    ColorData(name = "Yellow", tagColor = Color.Yellow, mainColor = ThemeColor.YELLOW),
-    ColorData(name = "Light-gray", tagColor = Color.LightGray, mainColor = ThemeColor.LIGHT_GRAY),
-    ColorData(name = "Dark-gray", tagColor = Color.DarkGray, mainColor = ThemeColor.DARK_GRAY)
-)
-
+/**
+ * CONFIRM/ DISMISS ACTION
+ * */
 @Composable
 fun ConfirmDismissAction(
     onConfirm: ()-> Unit,
