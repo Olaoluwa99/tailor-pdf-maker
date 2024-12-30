@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,6 +32,7 @@ import androidx.compose.material.icons.filled.InsertPageBreak
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SevereCold
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ChipColors
@@ -75,6 +77,8 @@ import com.easit.pdfmaker.data.resumeStyleList
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DefaultKeys(
+    isOnlyResume: Boolean = false,
+    isOnlyCoverLetter: Boolean = false,
     keywords: List<String>,
     sendSheetPeekHeight: (Dp) -> Unit,
     sendIsShowingResume: (Boolean) -> Unit,
@@ -103,36 +107,40 @@ fun DefaultKeys(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
         Row {
-            Button(
-                modifier = Modifier
-                    .weight(1f),
-                shape = RoundedCornerShape(50),
-                contentPadding = PaddingValues(vertical = 16.dp),
-                onClick = {
-                    if (isShowingResume){
-                        isShowingResume = false
-                        sendIsShowingResume(false)
-                        actionButtonText = "Cover letter"
-                        nonActionButtonText = "Resume"
-                    }else{
-                        isShowingResume = true
-                        sendIsShowingResume(true)
-                        actionButtonText = "Resume"
-                        nonActionButtonText = "Cover letter"
+            if (!isOnlyCoverLetter && !isOnlyResume){
+                Button(
+                    modifier = Modifier
+                        .weight(1f),
+                    shape = RoundedCornerShape(50),
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    onClick = {
+                        if (isShowingResume){
+                            isShowingResume = false
+                            sendIsShowingResume(false)
+                            actionButtonText = "Cover letter"
+                            nonActionButtonText = "Resume"
+                        }else{
+                            isShowingResume = true
+                            sendIsShowingResume(true)
+                            actionButtonText = "Resume"
+                            nonActionButtonText = "Cover letter"
+                        }
                     }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.TextSnippet,
+                        contentDescription = "Edit",
+                        modifier = Modifier.size(iconSize.dp),
+                        tint = MaterialTheme.colorScheme.background
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "View $nonActionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.TextSnippet,
-                    contentDescription = "Edit",
-                    modifier = Modifier.size(iconSize.dp),
-                    tint = MaterialTheme.colorScheme.background
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(text = "View $nonActionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
+
+                Spacer(modifier = Modifier.width(16.dp))
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+
             Button(
                 modifier = Modifier
                     .weight(1f),
@@ -155,7 +163,11 @@ fun DefaultKeys(
         Row {
             Button(
                 modifier = Modifier
-                    .weight(1f),
+                    .weight(1f)
+                    .onGloballyPositioned { coordinates ->
+                        buttonHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+                        sendSheetPeekHeight(buttonHeightDp)
+                    },
                 shape = RoundedCornerShape(50),
                 contentPadding = PaddingValues(vertical = 16.dp),
                 onClick = {
@@ -173,46 +185,50 @@ fun DefaultKeys(
                     tint = MaterialTheme.colorScheme.background
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = "Edit $actionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-            OutlinedButton(
-                modifier = Modifier
-                    .weight(1f)
-                    .onGloballyPositioned { coordinates ->
-                        buttonHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-                        sendSheetPeekHeight(buttonHeightDp)
-                    },
-            shape = RoundedCornerShape(50),
-            contentPadding = PaddingValues(vertical = 16.dp),
-            onClick = {
-                //showKeywordsSection = !showKeywordsSection
-                //TODO
-                if (!isBottomSheetFull){
-                    showKeywordsSection = true
-                    onFillBottomSheet(true)
-                    //scaffoldState.bottomSheetState.expand()
-                    keywordAction = "Hide"
-                    isBottomSheetFull = true
-                }else {
-                    onFillBottomSheet(false)
-                    //scaffoldState.bottomSheetState.partialExpand()
-                    showKeywordsSection = false
-                    keywordAction = "View"
-                    isBottomSheetFull = false
+                if (isOnlyCoverLetter){
+                    Text(text = "Edit Cover letter", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
+                }else if(isOnlyResume){
+                    Text(text = "Edit Resume", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
+                }else{
+                    Text(text = "Edit $actionButtonText", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.background)
                 }
             }
-            ) {
-            Icon(
-                imageVector = Icons.Default.Key,
-                contentDescription = "View Keywords",
-                modifier = Modifier.size(iconSize.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(text = "$keywordAction Keywords", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.primary)
-        }
+
+            if (!isOnlyCoverLetter && !isOnlyResume){
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    modifier = Modifier
+                        .weight(1f),
+                    shape = RoundedCornerShape(50),
+                    contentPadding = PaddingValues(vertical = 16.dp),
+                    onClick = {
+                        //showKeywordsSection = !showKeywordsSection
+                        //TODO
+                        if (!isBottomSheetFull){
+                            showKeywordsSection = true
+                            onFillBottomSheet(true)
+                            //scaffoldState.bottomSheetState.expand()
+                            keywordAction = "Hide"
+                            isBottomSheetFull = true
+                        }else {
+                            onFillBottomSheet(false)
+                            //scaffoldState.bottomSheetState.partialExpand()
+                            showKeywordsSection = false
+                            keywordAction = "View"
+                            isBottomSheetFull = false
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Key,
+                        contentDescription = "View Keywords",
+                        modifier = Modifier.size(iconSize.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "$keywordAction Keywords", overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.primary)
+                }
+            }
         }
 
         //
@@ -368,6 +384,7 @@ fun SelectSections(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectStyle(
+    defaultSelectedStyle: StyleType,
     onItemSelected: (StyleType) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -377,6 +394,8 @@ fun SelectStyle(
     var showStyleFullScreen by remember { mutableStateOf(false) }
     var selectedStyleType by remember { mutableStateOf(StyleType.ALPHA) }
     var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.resume_template1) }
+
+    LaunchedEffect(key1 = 0) { selectedStyleType = defaultSelectedStyle }
     
     //
     Column {
@@ -518,6 +537,7 @@ fun ColorSelector(
  * */
 @Composable
 fun ListFormatSheet(
+    isInvalidListType: Boolean,
     defaultIsSelected: ListFormat,
     onCompleted: (ListFormat)-> Unit,
     onDismiss: ()-> Unit
@@ -546,14 +566,27 @@ fun ListFormatSheet(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ){
                 items(listTypeList.size){
-                    ListTypeItem(
-                        type = listTypeList[it],
-                        isSelected = isSelected == listTypeList[it].tag,
-                        onClick = {
-                            isSelected = listTypeList[it].tag
-                            reload += reload
+                    if (isInvalidListType){
+                        if (listTypeList[it].tag != ListFormat.DOUBLE_COLUMN && listTypeList[it].tag != ListFormat.TRIPLE_COLUMN){
+                            ListTypeItem(
+                                type = listTypeList[it],
+                                isSelected = isSelected == listTypeList[it].tag,
+                                onClick = {
+                                    isSelected = listTypeList[it].tag
+                                    reload += reload
+                                }
+                            )
                         }
-                    )
+                    }else{
+                        ListTypeItem(
+                            type = listTypeList[it],
+                            isSelected = isSelected == listTypeList[it].tag,
+                            onClick = {
+                                isSelected = listTypeList[it].tag
+                                reload += reload
+                            }
+                        )
+                    }
                 }
 
                 item {
@@ -569,19 +602,23 @@ fun ListFormatSheet(
  * */
 @Composable
 fun ResultSelectionColumn(
+    isShowingCoverLetter: Boolean,
     onHideClicked: ()-> Unit,
     onStyleClicked: ()-> Unit,
     onColorClicked: ()-> Unit,
     onLinkColorClicked: ()-> Unit,
     onUnderlineClicked: ()-> Unit,
+    onNameCaseClicked: ()-> Unit,
     onSkillsClicked: ()-> Unit,
     onSoftSkillsClicked: ()-> Unit,
     onHobbiesClicked: ()-> Unit,
     onSectionsClicked: ()-> Unit,
+    extraSpacing: Int
 ){
     val spacing by remember { mutableStateOf(12.dp) }
     //
     Column(
+        modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         //
@@ -592,12 +629,14 @@ fun ResultSelectionColumn(
         )
         Spacer(modifier = Modifier.height(spacing))
 
-        ResultFixItem(
-            imageVector = Icons.Default.InsertPageBreak,
-            "Sections",
-            onAction = {onSectionsClicked()}
-        )
-        Spacer(modifier = Modifier.height(spacing))
+        if (!isShowingCoverLetter){
+            ResultFixItem(
+                imageVector = Icons.Default.InsertPageBreak,
+                "Sections",
+                onAction = {onSectionsClicked()}
+            )
+            Spacer(modifier = Modifier.height(spacing))
+        }
 
         ResultFixItem(
             imageVector = Icons.Default.AutoFixHigh,
@@ -613,39 +652,56 @@ fun ResultSelectionColumn(
         )
         Spacer(modifier = Modifier.height(spacing))
 
+        if (!isShowingCoverLetter){
+            ResultFixItem(
+                imageVector = Icons.Default.Palette,
+                "Link Color",
+                onAction = {onLinkColorClicked()}
+            )
+            Spacer(modifier = Modifier.height(spacing))
+
+            ResultFixItem(
+                imageVector = Icons.Default.FormatUnderlined,
+                "Underline",
+                onAction = {onUnderlineClicked()}
+            )
+            Spacer(modifier = Modifier.height(spacing))
+        }
+
         ResultFixItem(
-            imageVector = Icons.Default.Palette,
-            "Link Color",
-            onAction = {onLinkColorClicked()}
+            imageVector = Icons.Default.SortByAlpha,
+            "Name Case",
+            onAction = {onNameCaseClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
 
-        ResultFixItem(
-            imageVector = Icons.Default.FormatUnderlined,
-            "Underline",
-            onAction = {onUnderlineClicked()}
-        )
-        Spacer(modifier = Modifier.height(spacing))
+        if (!isShowingCoverLetter){
+            ResultFixItem(
+                imageVector = Icons.Default.SevereCold,
+                "Skills",
+                onAction = {onSkillsClicked()}
+            )
+            Spacer(modifier = Modifier.height(spacing))
 
-        ResultFixItem(
-            imageVector = Icons.Default.SevereCold,
-            "Skills",
-            onAction = {onSkillsClicked()}
-        )
-        Spacer(modifier = Modifier.height(spacing))
+            ResultFixItem(
+                imageVector = Icons.Default.SevereCold,
+                "Soft skills",
+                onAction = {onSoftSkillsClicked()}
+            )
+            Spacer(modifier = Modifier.height(spacing))
 
-        ResultFixItem(
-            imageVector = Icons.Default.SevereCold,
-            "Soft skills",
-            onAction = {onSoftSkillsClicked()}
-        )
-        Spacer(modifier = Modifier.height(spacing))
+            ResultFixItem(
+                imageVector = Icons.Default.FreeBreakfast,
+                "Hobbies",
+                onAction = {onHobbiesClicked()}
+            )
+        }
 
-        ResultFixItem(
-            imageVector = Icons.Default.FreeBreakfast,
-            "Hobbies",
-            onAction = {onHobbiesClicked()}
-        )
+        if (!isShowingCoverLetter){
+            //Half a Page
+            Spacer(modifier = Modifier.height(extraSpacing.dp))
+        }
+
     }
 }
 

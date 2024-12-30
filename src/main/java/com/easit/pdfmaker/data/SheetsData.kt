@@ -3,6 +3,24 @@ package com.easit.pdfmaker.data
 import androidx.compose.ui.graphics.Color
 import com.easit.pdfmaker.R
 
+data class PdfUiData(
+    //Resume
+    val isUnderlinedR: Boolean,
+    val isUppercaseNameR: Boolean,
+    val themeColorR: ThemeColor,
+    val linkColorR: ThemeColor,
+    val styleTypeR: StyleType,
+    val sectionR: List<Sections>,
+    val skillsListFormatR: ListFormat,
+    val softSkillsListFormatR: ListFormat,
+    val hobbiesListFormatR: ListFormat,
+
+    //Cover letter
+    val isUppercaseNameCL: Boolean,
+    val themeColorCL: ThemeColor,
+    val styleTypeCL: StyleType,
+)
+
 data class ResumeStyle(
     val tag: String,
     val title: String,

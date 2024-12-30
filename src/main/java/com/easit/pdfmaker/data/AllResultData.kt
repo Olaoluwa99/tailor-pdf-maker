@@ -16,12 +16,15 @@ data class CoverLetterData(
     val location: String,
     val date: String = "PLACEHOLDER_DATE",
 
+    val hiringManagerName: String = "Hiring Manager",
     val companyName: String = "PLACEHOLDER_NAME",
     val companyAddress: String = "PLACEHOLDER_ADDRESS",
     val companyLocation: String = "PLACEHOLDER_LOCATION",
 
+    val hiringManagerSalute: String = "Dear Hiring Manager,",
     val mainContent: String,
-    val closingSalutation: String
+    val closingSalutation: String,
+    val closingName: String
 )
 
 

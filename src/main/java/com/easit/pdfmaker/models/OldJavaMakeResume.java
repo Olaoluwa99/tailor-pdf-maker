@@ -1,13 +1,29 @@
 package com.easit.pdfmaker.models;
 
+import java.util.ArrayList;
+
 public class OldJavaMakeResume {
-    /*private final String mPath;
+    private final String mPath;
     private final String mThemeColor;
     private final String mStyleType;
-    private final ArrayList<String> mSectionList;*/
+    private final ArrayList<String> mSectionList;
+
+    public OldJavaMakeResume(String mPath, String mThemeColor, String mStyleType, ArrayList<String> mSectionList) {
+        this.mPath = mPath;
+        this.mThemeColor = mThemeColor;
+        this.mStyleType = mStyleType;
+        this.mSectionList = mSectionList;
+
+    }
+}
+/*public class OldJavaMakeResume {
+    private final String mPath;
+    private final String mThemeColor;
+    private final String mStyleType;
+    private final ArrayList<String> mSectionList;
 
     // Constructor that accepts a Context as argument
-    /*public MakeResume(String path, String themeColor, String styleType, ArrayList<String> sectionList) {
+    public MakeResume(String path, String themeColor, String styleType, ArrayList<String> sectionList) {
         this.mPath = path;
         this.mThemeColor = themeColor;
         this.mStyleType = styleType;
@@ -51,8 +67,8 @@ public class OldJavaMakeResume {
             PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(mPath)));
             document.open();
 
-            *//*Paragraph mains = new Paragraph("This is the Header");
-            document.add(mains);*//*
+            Paragraph mains = new Paragraph("This is the Header");
+            document.add(mains);
 
             //TODO - HEADER
             Paragraph contactItem = createContactDetailsSection(
@@ -593,7 +609,6 @@ public class OldJavaMakeResume {
                 }
             }
 
-
             //TODO - TECHNICAL SKILLS
             switch (skillFormatType){
                 case "SINGLE-LIST" :
@@ -654,7 +669,6 @@ public class OldJavaMakeResume {
                     break;
             }
 
-
             //TODO - HOBBIES
             if(item.getHobbiesItemList() != null){
                 Paragraph hobbiesHeader = createHeader("HOBBIES");
@@ -681,7 +695,7 @@ public class OldJavaMakeResume {
                 for (int i = 0; i <= item.getExperienceItemList().size()-1; i++) {
                     Paragraph experienceText = createExperienceSection(item.getExperienceItemList().get(i));
                     if (i != item.getExperienceItemList().size()-1) experienceText.setSpacingAfter(multiItemSpacing);
-                    *//*mainDualCell2*//*mainExperienceText.add(experienceText);
+                    mainDualCell2mainExperienceText.add(experienceText);
                 }
                 //sampleList.add(new ListItem(mainExperienceText));
             }
@@ -732,7 +746,7 @@ public class OldJavaMakeResume {
     }
 
     public void makeResumeType5(ResumeItem item) {
-        *//*Type 5*//*
+        Type 5
     }
 
     //
@@ -752,7 +766,7 @@ public class OldJavaMakeResume {
         float pageWidth = document.getPageSize().getWidth();
 
         // Y-position for the line (adjust this for where you want the line)
-        float yPos = document.getPageSize().getHeight() - document.topMargin() *//*- 50*//*;
+        float yPos = document.getPageSize().getHeight() - document.topMargin() - 50;
 
         // Move to the start position (left side)
         cb.moveTo(leftMargin, yPos);
@@ -1013,9 +1027,9 @@ public class OldJavaMakeResume {
         Paragraph section = new Paragraph();
 
         //SET 1
-        *//*Paragraph educationHeader = new Paragraph("EDUCATION", timesNewRomanBold);
+        Paragraph educationHeader = new Paragraph("EDUCATION", timesNewRomanBold);
         educationHeader.setSpacingAfter(5f);
-        section.add(educationHeader);*//*
+        section.add(educationHeader);
 
 
         for (int i = 0; i <= item.size()-1; i++) {
@@ -1256,5 +1270,5 @@ public class OldJavaMakeResume {
                 certificationsList,
                 hobbiesList
         );
-    }*/
-}
+    }
+}*/
