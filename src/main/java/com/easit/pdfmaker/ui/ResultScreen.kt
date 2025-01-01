@@ -115,6 +115,7 @@ fun ResultScreen(
 
     var buttonHeightDp by remember { mutableStateOf(30.dp) }
     var hasReloaded by remember { mutableIntStateOf(0) }
+    var hasReloadedCoverLetter by remember { mutableIntStateOf(0) }
 
     when (resultViewModel.delayCompleted.collectAsState().value){
         ReloadState.COMPLETED -> {
@@ -320,7 +321,8 @@ fun ResultScreen(
                 }
                 SheetMode.STYLE -> {
                     SelectStyle(
-                        defaultSelectedStyle = selectedStyleResume,
+                        isCoverLetter = !isShowingResume,
+                        defaultSelectedStyle = if (isShowingResume) selectedStyleResume else selectedStyleCoverLetter,
                         onDismiss = {
                             /**/
                             sheetMode = SheetMode.DEFAULT
@@ -330,30 +332,47 @@ fun ResultScreen(
                             showEditSection = true
                         },
                         onItemSelected = {
-                            selectedStyleResume = it
+                            if (isShowingResume){
+                                selectedStyleResume = it
+                            }else {
+                                selectedStyleCoverLetter = it
+                                Toast.makeText(context, it.name, Toast.LENGTH_LONG).show()
+                            }
+
                             sheetMode = SheetMode.DEFAULT
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
                             showEditSection = true
                             progressDialogVisible = true
-                            ResumeMaker(resumeItemPath)
-                                .createResume(
-                                    item = resultViewModel.resultData.value.resume!!,
-                                    skillFormatType = skillFormatType,
-                                    softSkillFormatType = softSkillFormatType,
-                                    hobbiesFormatType = hobbiesFormatType,
-                                    showUnderline = showUnderline,
-                                    uppercaseName = isUpperCaseNameResume,
-                                    themeColor = selectedThemeColorResume,
-                                    linkColor = selectedLinkColorResume,
-                                    styleType = selectedStyleResume,
-                                    sectionList = sectionList,
-                                    onPdfCreated = {
-                                        //hasReloaded += hasReloaded
-                                        resultViewModel.delayTimer(5000)
-                                    }
-                                )
+
+                            if (isShowingResume){
+                                ResumeMaker(resumeItemPath)
+                                    .createResume(
+                                        item = resultViewModel.resultData.value.resume!!,
+                                        skillFormatType = skillFormatType,
+                                        softSkillFormatType = softSkillFormatType,
+                                        hobbiesFormatType = hobbiesFormatType,
+                                        showUnderline = showUnderline,
+                                        uppercaseName = isUpperCaseNameResume,
+                                        themeColor = selectedThemeColorResume,
+                                        linkColor = selectedLinkColorResume,
+                                        styleType = selectedStyleResume,
+                                        sectionList = sectionList,
+                                        onPdfCreated = {
+                                            resultViewModel.delayTimer(5000)
+                                        }
+                                    )
+                            }else{
+                                CoverLetterMaker(coverLetterItemPath)
+                                    .createCoverLetter(
+                                        item = resultViewModel.resultData.value.coverLetter!!,
+                                        themeColor = selectedThemeColorCoverLetter,
+                                        styleType = selectedStyleCoverLetter,
+                                        uppercaseName = isUpperCaseNameCoverLetter,
+                                        onPdfCreated = { resultViewModel.delayTimer(5000) }
+                                    )
+                            }
                         }
                     )
                 }
@@ -397,32 +416,46 @@ fun ResultScreen(
                 }
                 SheetMode.COLOR -> {
                     ColorSelector(
-                        defaultSelectedColor = selectedThemeColorResume,
+                        defaultSelectedColor = if (isShowingResume) selectedThemeColorResume else selectedThemeColorCoverLetter,
                         onColorClick = {
-                            selectedThemeColorResume = it
+                            if (isShowingResume){
+                                selectedThemeColorResume = it
+                            }else selectedThemeColorCoverLetter = it
+
                             sheetMode = SheetMode.DEFAULT
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
                             showEditSection = true
                             progressDialogVisible = true
-                            ResumeMaker(resumeItemPath)
-                                .createResume(
-                                    item = resultViewModel.resultData.value.resume!!,
-                                    skillFormatType = skillFormatType,
-                                    softSkillFormatType = softSkillFormatType,
-                                    hobbiesFormatType = hobbiesFormatType,
-                                    showUnderline = showUnderline,
-                                    uppercaseName = isUpperCaseNameResume,
-                                    themeColor = selectedThemeColorResume,
-                                    linkColor = selectedLinkColorResume,
-                                    styleType = selectedStyleResume,
-                                    sectionList = sectionList,
-                                    onPdfCreated = {
-                                        //hasReloaded += hasReloaded
-                                        resultViewModel.delayTimer(5000)
-                                    }
-                                )
+
+                            if (isShowingResume){
+                                ResumeMaker(resumeItemPath)
+                                    .createResume(
+                                        item = resultViewModel.resultData.value.resume!!,
+                                        skillFormatType = skillFormatType,
+                                        softSkillFormatType = softSkillFormatType,
+                                        hobbiesFormatType = hobbiesFormatType,
+                                        showUnderline = showUnderline,
+                                        uppercaseName = isUpperCaseNameResume,
+                                        themeColor = selectedThemeColorResume,
+                                        linkColor = selectedLinkColorResume,
+                                        styleType = selectedStyleResume,
+                                        sectionList = sectionList,
+                                        onPdfCreated = {
+                                            resultViewModel.delayTimer(5000)
+                                        }
+                                    )
+                            }else{
+                                CoverLetterMaker(coverLetterItemPath)
+                                    .createCoverLetter(
+                                        item = resultViewModel.resultData.value.coverLetter!!,
+                                        themeColor = selectedThemeColorCoverLetter,
+                                        styleType = selectedStyleCoverLetter,
+                                        uppercaseName = isUpperCaseNameCoverLetter,
+                                        onPdfCreated = { resultViewModel.delayTimer(5000) }
+                                    )
+                            }
                         },
                         onDismiss = {
                             sheetMode = SheetMode.DEFAULT
@@ -620,10 +653,12 @@ fun ResultScreen(
                                             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                             .padding(2.dp)
                                     ){
-                                        PdfRendererViewCompose(
-                                            file = outputCoverLetterFile,
-                                            lifecycleOwner = LocalLifecycleOwner.current
-                                        )
+                                        key(hasReloaded){
+                                            PdfRendererViewCompose(
+                                                file = outputCoverLetterFile,
+                                                lifecycleOwner = LocalLifecycleOwner.current
+                                            )
+                                        }
                                     }
                                 }
                             }else if(isOnlyResume){
@@ -664,10 +699,12 @@ fun ResultScreen(
                                                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                                 .padding(2.dp)
                                         ){
-                                            PdfRendererViewCompose(
-                                                file = outputCoverLetterFile,
-                                                lifecycleOwner = LocalLifecycleOwner.current
-                                            )
+                                            key(hasReloaded){
+                                                PdfRendererViewCompose(
+                                                    file = outputCoverLetterFile,
+                                                    lifecycleOwner = LocalLifecycleOwner.current
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -752,24 +789,34 @@ fun ResultScreen(
                         },
                         onNameCaseClicked = {
                             progressDialogVisible = true
-                            isUpperCaseNameResume = !isUpperCaseNameResume
-                            ResumeMaker(resumeItemPath)
-                                .createResume(
-                                    item = resultViewModel.resultData.value.resume!!,
-                                    skillFormatType = skillFormatType,
-                                    softSkillFormatType = softSkillFormatType,
-                                    hobbiesFormatType = hobbiesFormatType,
-                                    showUnderline = showUnderline,
-                                    uppercaseName = isUpperCaseNameResume,
-                                    themeColor = selectedThemeColorResume,
-                                    linkColor = selectedLinkColorResume,
-                                    styleType = selectedStyleResume,
-                                    sectionList = sectionList,
-                                    onPdfCreated = {
-                                        //hasReloaded += hasReloaded
-                                        resultViewModel.delayTimer(5000)
-                                    }
-                                )
+                            if (isShowingResume) isUpperCaseNameResume = !isUpperCaseNameResume else isUpperCaseNameCoverLetter = !isUpperCaseNameCoverLetter
+                            if (isShowingResume){
+                                ResumeMaker(resumeItemPath)
+                                    .createResume(
+                                        item = resultViewModel.resultData.value.resume!!,
+                                        skillFormatType = skillFormatType,
+                                        softSkillFormatType = softSkillFormatType,
+                                        hobbiesFormatType = hobbiesFormatType,
+                                        showUnderline = showUnderline,
+                                        uppercaseName = isUpperCaseNameResume,
+                                        themeColor = selectedThemeColorResume,
+                                        linkColor = selectedLinkColorResume,
+                                        styleType = selectedStyleResume,
+                                        sectionList = sectionList,
+                                        onPdfCreated = {
+                                            resultViewModel.delayTimer(5000)
+                                        }
+                                    )
+                            }else{
+                                CoverLetterMaker(coverLetterItemPath)
+                                    .createCoverLetter(
+                                        item = resultViewModel.resultData.value.coverLetter!!,
+                                        themeColor = selectedThemeColorCoverLetter,
+                                        styleType = selectedStyleCoverLetter,
+                                        uppercaseName = isUpperCaseNameCoverLetter,
+                                        onPdfCreated = { resultViewModel.delayTimer(5000) }
+                                    )
+                            }
                         },
                         onSkillsClicked = {
                             showEditSection = false

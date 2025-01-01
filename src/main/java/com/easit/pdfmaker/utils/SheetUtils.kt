@@ -62,12 +62,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.easit.pdfmaker.R
 import com.easit.pdfmaker.constants.Constant
+import com.easit.pdfmaker.data.ItemStyle
 import com.easit.pdfmaker.data.ListFormat
 import com.easit.pdfmaker.data.Sections
 import com.easit.pdfmaker.data.StyleType
 import com.easit.pdfmaker.data.ThemeColor
 import com.easit.pdfmaker.data.allSectionList
 import com.easit.pdfmaker.data.colorList
+import com.easit.pdfmaker.data.coverLetterStyleList
 import com.easit.pdfmaker.data.listTypeList
 import com.easit.pdfmaker.data.resumeStyleList
 
@@ -384,6 +386,7 @@ fun SelectSections(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SelectStyle(
+    isCoverLetter: Boolean = false,
     defaultSelectedStyle: StyleType,
     onItemSelected: (StyleType) -> Unit,
     onDismiss: () -> Unit
@@ -394,8 +397,16 @@ fun SelectStyle(
     var showStyleFullScreen by remember { mutableStateOf(false) }
     var selectedStyleType by remember { mutableStateOf(StyleType.ALPHA) }
     var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.resume_template1) }
+    var itemStyleList by remember { mutableStateOf(emptyList<ItemStyle>()) }
 
-    LaunchedEffect(key1 = 0) { selectedStyleType = defaultSelectedStyle }
+    LaunchedEffect(key1 = 0) {
+        selectedStyleType = defaultSelectedStyle
+        if (isCoverLetter){
+            itemStyleList = coverLetterStyleList
+            selectedExpandStyleImageId = R.drawable.resume_template1 //TODO - Change to default Cover letter Image Id
+        }else itemStyleList = resumeStyleList
+    }
+
     
     //
     Column {
@@ -427,7 +438,7 @@ fun SelectStyle(
                     horizontalArrangement = Arrangement.SpaceAround,//spacedBy(8.dp),
                     maxItemsInEachRow = 2
                 ) {
-                    resumeStyleList.forEachIndexed { index, resumeStyle ->
+                    itemStyleList.forEachIndexed { index, resumeStyle ->
                         ImageItem(
                             imageId = resumeStyle.image,
                             typeName = resumeStyle.title,
@@ -435,23 +446,23 @@ fun SelectStyle(
                             onClick = {
                                 selectedIndex = index
                                 when (selectedIndex){
-                                    1 -> {
+                                    0 -> {
                                         selectedStyleType = StyleType.ALPHA
                                         reload += 1
                                     }
-                                    2 -> {
+                                    1 -> {
                                         selectedStyleType = StyleType.BETA
                                         reload += 1
                                     }
-                                    3 -> {
+                                    2 -> {
                                         selectedStyleType = StyleType.DELTA
                                         reload += 1
                                     }
-                                    4 -> {
+                                    3 -> {
                                         selectedStyleType = StyleType.GAMMA
                                         reload += 1
                                     }
-                                    5 -> {
+                                    4 -> {
                                         selectedStyleType = StyleType.OMEGA
                                         reload += 1
                                     }

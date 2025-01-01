@@ -210,9 +210,10 @@ fun createHeader(text: String?): Paragraph {
     return header
 }
 
-fun createHeader(text: String?, size: Float): Paragraph {
+fun createHeader(text: String?, size: Float, font: Font?): Paragraph {
     val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, size)
-    val header = Paragraph(text, timesNewRomanBold)
+    val selectedFont = font ?: timesNewRomanBold
+    val header = Paragraph(text, selectedFont)
     header.spacingAfter = 5f // Add some spacing after the header
     return header
 }
@@ -245,8 +246,52 @@ fun createHeaderWithHorizontalLine(headerText: String, lineColor: Color): Paragr
     return section
 }
 
+fun createHorizontalLine(lineColor: Color): Paragraph {
+
+    val lineSeparator = LineSeparator()
+    lineSeparator.lineWidth = 1f
+    lineSeparator.lineColor = lineColor
+    lineSeparator.percentage = 100f
+
+    val lineChunk = Chunk(lineSeparator)
+    val line = Paragraph(Chunk(lineSeparator))
+    line.spacingBefore = 5f
+    line.spacingAfter = 5f
+
+    val section = Paragraph()
+    section.add(lineChunk)
+    section.spacingAfter = 10f
+
+    return section
+}
+
+fun createHeaderWithHorizontalLine(headerText: String, lineColor: Color, font: Font): Paragraph {
+    val header = Paragraph(headerText, font)
+
+    val lineSeparator = LineSeparator()
+    lineSeparator.lineWidth = 1f
+    lineSeparator.lineColor = lineColor
+    lineSeparator.percentage = 100f
+
+    val lineChunk = Chunk(lineSeparator)
+    val test = Paragraph(Chunk(lineSeparator))
+    test.spacingBefore = -5f
+
+    val section = Paragraph()
+    section.add(header)
+    section.add(lineChunk)
+    section.spacingAfter = 10f
+
+    return section
+}
+
 fun createMain(text: String?): Paragraph {
     val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    return Paragraph(text, timesNewRomanPlain)
+}
+
+fun createMainBold(text: String?): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
     return Paragraph(text, timesNewRomanPlain)
 }
 

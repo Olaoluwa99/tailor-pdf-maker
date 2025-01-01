@@ -21,7 +21,7 @@ data class PdfUiData(
     val styleTypeCL: StyleType,
 )
 
-data class ResumeStyle(
+data class ItemStyle(
     val tag: String,
     val title: String,
     val image: Int
@@ -63,11 +63,19 @@ val listTypeList = listOf(
 )
 
 val resumeStyleList = listOf(
-    ResumeStyle("alphaStyle", "Modern", R.drawable.resume_template1),
-    ResumeStyle("betaStyle", "Real", R.drawable.resume_template2),
-    ResumeStyle("deltaStyle", "Fine", R.drawable.resume_template3),
-    ResumeStyle("gammaStyle", "Dual 1", R.drawable.resume_template4),
-    ResumeStyle("omegaStyle", "Dual 2", R.drawable.resume_template5),
+    ItemStyle("alphaStyle", "Modern", R.drawable.resume_template1),
+    ItemStyle("betaStyle", "Real", R.drawable.resume_template2),
+    ItemStyle("deltaStyle", "Fine", R.drawable.resume_template3),
+    ItemStyle("gammaStyle", "Dual 1", R.drawable.resume_template4),
+    ItemStyle("omegaStyle", "Dual 2", R.drawable.resume_template5),
+)
+
+val coverLetterStyleList = listOf(
+    ItemStyle("alphaStyle", "Not-Modern", R.drawable.resume_template1),
+    ItemStyle("betaStyle", "Not-Real", R.drawable.resume_template2),
+    ItemStyle("deltaStyle", "Not-Fine", R.drawable.resume_template3),
+    ItemStyle("gammaStyle", "Not-Dual 1", R.drawable.resume_template4),
+    ItemStyle("omegaStyle", "Not-Dual 2", R.drawable.resume_template5),
 )
 
 val colorList = listOf(
