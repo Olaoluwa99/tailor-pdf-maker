@@ -2,6 +2,8 @@ package com.easit.pdfmaker.data
 
 import androidx.compose.ui.graphics.Color
 import com.easit.pdfmaker.R
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 data class PdfUiData(
     //Resume
@@ -20,6 +22,16 @@ data class PdfUiData(
     val themeColorCL: ThemeColor,
     val styleTypeCL: StyleType,
 )
+
+fun deserializePdfUiData(text: String): PdfUiData {
+    val data: PdfUiData = Json.decodeFromString(text.trim())
+    return data
+}
+
+fun serializePdfUiData(data: PdfUiData): String{
+    val serializedString: String = Json.encodeToString(data)
+    return serializedString
+}
 
 data class ItemStyle(
     val tag: String,
