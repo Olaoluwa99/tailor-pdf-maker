@@ -289,9 +289,8 @@ fun DefaultKeys(
 /**
  * SECTIONS
  * */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun SelectSections(
+/*@Composable
+fun SelectSectionsOld(
     defaultSectionList: List<Sections>,
     onConfirm: (List<Sections>) -> Unit,
     onDismiss: () -> Unit
@@ -320,20 +319,20 @@ fun SelectSections(
                 .fillMaxWidth()
         ) {
             key(reload) {
-                LazyColumn (
+                LazyColumn(
                     modifier = Modifier.padding(16.dp),
                     //verticalArrangement = Arrangement.spacedBy(12.dp)
-                ){
-                    items(allSectionList.size){
+                ) {
+                    items(allSectionList.size) {
                         key(reload) {
                             SectionItem(
                                 title = allSectionList[it].tag,
                                 defaultIsChecked = currentSectionList.contains(allSectionList[it].section),
                                 onCheckedChange = {
                                     val item = allSectionList[it].section
-                                    if (currentSectionList.contains(item)){
+                                    if (currentSectionList.contains(item)) {
                                         currentSectionList.remove(item)
-                                    }else {
+                                    } else {
                                         currentSectionList.add(item)
                                     }
                                     reload += reload
@@ -346,35 +345,185 @@ fun SelectSections(
                         Spacer(modifier = Modifier.height(48.dp))
                     }
                 }
+            }
+        }
+    }
+}*/
 
-                /*FlowRow(
-                    modifier = Modifier
-                        .safeDrawingPadding()
-                        .fillMaxWidth(1f)
-                        //.padding(16.dp)
-                        .wrapContentHeight(align = Alignment.Top),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,//spacedBy(8.dp),
-                    maxItemsInEachRow = 2
-                ) {
-                    //
-                    for (mainItem in allSectionList){
-                        SectionItem(
-                            title = mainItem.tag,
-                            isChecked = currentSectionList.contains(mainItem.section),
-                            onCheckedChange = {
-                                val item = mainItem.section
-                                if (currentSectionList.contains(item)){
-                                    currentSectionList.remove(item)
-                                    reload += reload
-                                }else {
-                                    currentSectionList.add(item)
-                                    reload += reload
-                                }
-                            }
-                        )
+@Composable
+fun SelectSections(
+    defaultSectionList: List<Sections>,
+    onConfirm: (List<Sections>) -> Unit,
+    onDismiss: () -> Unit
+) {
+
+    var currentSectionList by remember { mutableStateOf(mutableListOf<Sections>()) }
+
+    var isObjectiveChecked by remember { mutableStateOf(true) }
+    var isExperienceChecked by remember { mutableStateOf(true) }
+    var isEducationChecked by remember { mutableStateOf(true) }
+    var isProjectChecked by remember { mutableStateOf(true) }
+    var isSkillsChecked by remember { mutableStateOf(true) }
+    var isSoftSkillsChecked by remember { mutableStateOf(true) }
+    var isCertificationsChecked by remember { mutableStateOf(true) }
+    var isHobbiesChecked by remember { mutableStateOf(true) }
+
+    LaunchedEffect(key1 = 0) {
+        currentSectionList = defaultSectionList.toMutableList()
+
+        isObjectiveChecked = defaultSectionList.contains(allSectionList[0].section)
+        isExperienceChecked = defaultSectionList.contains(allSectionList[1].section)
+        isEducationChecked = defaultSectionList.contains(allSectionList[2].section)
+        isProjectChecked = defaultSectionList.contains(allSectionList[3].section)
+        isSkillsChecked = defaultSectionList.contains(allSectionList[4].section)
+        isSoftSkillsChecked = defaultSectionList.contains(allSectionList[5].section)
+        isCertificationsChecked = defaultSectionList.contains(allSectionList[6].section)
+        isHobbiesChecked = defaultSectionList.contains(allSectionList[7].section)
+    }
+
+
+    //
+    Column {
+        //
+        Column {
+            Spacer(modifier = Modifier.height(Constant.SHEET_HEADER_SPACING.dp))
+            ConfirmDismissAction(
+                onConfirm = { onConfirm(currentSectionList) },
+                onDismiss = { onDismiss() }
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+
+        //
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Column (
+                modifier = Modifier.padding(16.dp),
+            ){
+                SectionItem(
+                    title = allSectionList[0].tag,
+                    defaultIsChecked = isObjectiveChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[0].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isObjectiveChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isObjectiveChecked = true
+                        }
                     }
-                }*/
+                )
+
+                SectionItem(
+                    title = allSectionList[1].tag,
+                    defaultIsChecked = isExperienceChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[1].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isExperienceChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isExperienceChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[2].tag,
+                    defaultIsChecked = isEducationChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[2].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isEducationChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isEducationChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[3].tag,
+                    defaultIsChecked = isProjectChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[3].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isProjectChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isProjectChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[4].tag,
+                    defaultIsChecked = isSkillsChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[4].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isSkillsChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isSkillsChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[5].tag,
+                    defaultIsChecked = isSoftSkillsChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[5].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isSoftSkillsChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isSoftSkillsChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[6].tag,
+                    defaultIsChecked = isCertificationsChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[6].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isCertificationsChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isCertificationsChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[7].tag,
+                    defaultIsChecked = isHobbiesChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[7].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isHobbiesChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isHobbiesChecked = true
+                        }
+                    }
+                )
+
+                //
+                Spacer(modifier = Modifier.height(48.dp))
             }
         }
     }

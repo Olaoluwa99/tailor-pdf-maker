@@ -23,7 +23,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -288,23 +290,30 @@ fun SectionItem(
 ) {
     //var isChecked by remember { mutableStateOf(false) }
     //LaunchedEffect(key1 = 0) { isChecked = defaultIsChecked }
+    var reload by remember { mutableIntStateOf(0) }
+    //LaunchedEffect(key1 = Unit) { reload += reload }
+
     Row (
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 //isChecked = !isChecked
                 onCheckedChange()
+                reload += reload
             }
             .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ){
-        Checkbox(
-            checked = defaultIsChecked,
-            onCheckedChange = {
-                //isChecked = !isChecked
-                onCheckedChange()
-            },
-        )
+        key(reload) {
+            Checkbox(
+                checked = defaultIsChecked,
+                onCheckedChange = {
+                    //isChecked = !isChecked
+                    onCheckedChange()
+                    reload += reload
+                },
+            )
+        }
         Spacer(modifier = Modifier.width(12.dp))
         Text(text = title, fontWeight = FontWeight.Bold)
     }
