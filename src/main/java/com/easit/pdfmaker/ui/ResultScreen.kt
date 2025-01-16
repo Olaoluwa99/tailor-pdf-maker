@@ -134,7 +134,7 @@ fun ResultScreen(
     var isUpperCaseNameCoverLetter by remember { mutableStateOf(true) }
 
     //  Resume
-    var selectedStyleResume by remember { mutableStateOf(StyleType.GAMMA) }
+    var selectedStyleResume by remember { mutableStateOf(StyleType.ALPHA) }
     var selectedThemeColorResume by remember { mutableStateOf(ThemeColor.BLACK) }
     var selectedLinkColorResume by remember { mutableStateOf(ThemeColor.BLUE) }
 
@@ -320,6 +320,7 @@ fun ResultScreen(
                     )
                 }
                 SheetMode.STYLE -> {
+                    println("1 - $selectedStyleResume")
                     SelectStyle(
                         isCoverLetter = !isShowingResume,
                         defaultSelectedStyle = if (isShowingResume) selectedStyleResume else selectedStyleCoverLetter,
@@ -343,7 +344,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
 
                             if (isShowingResume){
@@ -385,7 +386,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -426,7 +427,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
 
                             if (isShowingResume){
@@ -475,7 +476,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -514,7 +515,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -552,7 +553,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -590,7 +591,7 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
+                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -769,6 +770,7 @@ fun ResultScreen(
                         onUnderlineClicked = {
                             progressDialogVisible = true
                             showUnderline = !showUnderline
+                            showEditSection = false
                             ResumeMaker(resumeItemPath)
                                 .createResume(
                                     item = resultViewModel.resultData.value.resume!!,
@@ -790,6 +792,7 @@ fun ResultScreen(
                         onNameCaseClicked = {
                             progressDialogVisible = true
                             if (isShowingResume) isUpperCaseNameResume = !isUpperCaseNameResume else isUpperCaseNameCoverLetter = !isUpperCaseNameCoverLetter
+                            showEditSection = false
                             if (isShowingResume){
                                 ResumeMaker(resumeItemPath)
                                     .createResume(

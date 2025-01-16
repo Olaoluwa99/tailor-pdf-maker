@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.automirrored.outlined.TextSnippet
 import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Check
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.InsertPageBreak
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.SevereCold
 import androidx.compose.material.icons.filled.SortByAlpha
@@ -541,15 +543,24 @@ fun SelectStyle(
     onDismiss: () -> Unit
 ) {
 
+    println("3 - $defaultSelectedStyle")
     var reload by remember { mutableIntStateOf(0) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     var showStyleFullScreen by remember { mutableStateOf(false) }
-    var selectedStyleType by remember { mutableStateOf(StyleType.ALPHA) }
+    var selectedStyleType by remember { mutableStateOf(defaultSelectedStyle) }
     var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.resume_template1) }
     var itemStyleList by remember { mutableStateOf(emptyList<ItemStyle>()) }
 
     LaunchedEffect(key1 = 0) {
-        selectedStyleType = defaultSelectedStyle
+        selectedIndex = when (selectedStyleType){
+            StyleType.ALPHA -> 0
+            StyleType.BETA -> 1
+            StyleType.DELTA -> 2
+            StyleType.GAMMA -> 3
+            StyleType.OMEGA -> 4
+        }
+        println("2 - $selectedStyleType")
+        //selectedStyleType = defaultSelectedStyle
         if (isCoverLetter){
             itemStyleList = coverLetterStyleList
             selectedExpandStyleImageId = R.drawable.resume_template1 //TODO - Change to default Cover letter Image Id
@@ -837,21 +848,21 @@ fun ResultSelectionColumn(
 
         if (!isShowingCoverLetter){
             ResultFixItem(
-                imageVector = Icons.Default.SevereCold,
+                imageVector = Icons.AutoMirrored.Filled.ListAlt,
                 "Skills",
                 onAction = {onSkillsClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
 
             ResultFixItem(
-                imageVector = Icons.Default.SevereCold,
+                imageVector = Icons.AutoMirrored.Filled.ListAlt,
                 "Soft skills",
                 onAction = {onSoftSkillsClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
 
             ResultFixItem(
-                imageVector = Icons.Default.FreeBreakfast,
+                imageVector = Icons.AutoMirrored.Filled.ListAlt,
                 "Hobbies",
                 onAction = {onHobbiesClicked()}
             )

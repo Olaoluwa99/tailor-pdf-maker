@@ -47,10 +47,10 @@ fun createContactDetailsSection(
     emailLink.reference = "mailto:$iEmail"
     //START
     //Name
-    val processedName: String = if (isUpperCase) iName.uppercase() else iName
+    /*val processedName: String = if (isUpperCase) iName.uppercase() else iName
     val name = Paragraph(processedName, timesNewRomanName)
     name.setAlignment("Center")
-    //name.setSpacingAfter(7.5f);
+    name.spacingAfter = 65f*/
     //Role
     val role = Paragraph(iJobRole, timesNewRomanRole)
     role.setAlignment("Center")
@@ -94,7 +94,7 @@ fun createContactDetailsSection(
 
     //CLOSE
     val section = Paragraph()
-    section.add(name)
+    //section.add(name)
     section.add(role)
     section.add(contact)
     section.add(location)
@@ -107,10 +107,48 @@ fun createContactDetailsSection(
     return section
 }
 
+fun createContactDetailsSectionNarrow(
+    iJobRole: String,
+    iPhone: String, iEmail: String,
+    iLocation: String,
+    iLink1: String?, iLink2: String?,
+    linkColor: Color
+): Paragraph {
+    val timesNewRomanRole = FontFactory.getFont(FontFactory.TIMES, 16f)
+    val linkFont = FontFactory.getFont(
+        FontFactory.TIMES,
+        12f,
+        Font.UNDERLINE,
+        linkColor
+    ) // Blue color for hyperlink
+
+    //
+    val emailLink = Anchor(iEmail, linkFont)
+    emailLink.reference = "mailto:$iEmail"
+    //START
+    //Role
+    val role = Paragraph(iJobRole, timesNewRomanRole)
+    role.setAlignment("Center")
+    role.spacingAfter = 2.5f
+
+
+    //CONTACT
+    val contactItem = createHalfContactSection(
+        iPhone, iEmail, iLocation,
+        iLink1, iLink2, linkColor
+    )
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(role)
+    section.add(contactItem)
+    return section
+}
+
 fun createHalfContactSection(
     iPhone: String, iEmail: String,
     iLocation: String,
-    iLink1: String, iLink2: String, linkColor: Color
+    iLink1: String?, iLink2: String?, linkColor: Color
 ): Paragraph {
     val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
     val linkFont = FontFactory.getFont(FontFactory.TIMES, 12f, Font.UNDERLINE, linkColor)
@@ -129,23 +167,29 @@ fun createHalfContactSection(
 
     //Links
     val links = Paragraph()
-    val link1 = Anchor(iLink1, linkFont)
-    link1.reference = iLink1
-    links.add(link1)
+    if (!iLink1.isNullOrBlank()){
+        val link1 = Anchor(iLink1, linkFont)
+        link1.reference = iLink1
+        links.add(link1)
+    }
 
     //
-    val link2 = Anchor(iLink2, linkFont)
-    link2.reference = iLink2
-    links.add(Chunk.NEWLINE)
-    links.add(link2)
-    links.spacingAfter = 10f
+    if (!iLink2.isNullOrBlank()){
+        val link2 = Anchor(iLink2, linkFont)
+        link2.reference = iLink2
+        links.add(Chunk.NEWLINE)
+        links.add(link2)
+    }
+    //
+    if (!iLink1.isNullOrBlank() || !iLink2.isNullOrBlank()) links.spacingAfter = 10f
+
 
     //CLOSE
     val section = Paragraph()
     section.add(phone)
     section.add(contact)
     section.add(location)
-    section.add(links)
+    if (!iLink1.isNullOrBlank() || !iLink2.isNullOrBlank()) section.add(links)
 
     //
     return section
@@ -156,7 +200,7 @@ fun createContactDetailsSectionSplit(
     iJobRole: String,
     iPhone: String, iEmail: String,
     iLocation: String,
-    iLink1: String, iLink2: String,
+    iLink1: String?, iLink2: String?,
     linkColor: Color, isUpperCase: Boolean
 ): Paragraph {
     //
@@ -385,6 +429,7 @@ fun createExperienceSectionSplit(experienceItem: ExperienceItem): Paragraph {
         bulletList.add(listItem)
     }
     bulletList.alignment = Element.ALIGN_JUSTIFIED
+    bulletList.spacingBefore = 100f
 
     //CLOSE
     val section = Paragraph()
@@ -395,6 +440,44 @@ fun createExperienceSectionSplit(experienceItem: ExperienceItem): Paragraph {
     section.add(bulletList)
 
     return section
+}
+
+fun createExperienceSectionHeader(experienceItem: ExperienceItem): Paragraph {
+    val timesNewRomanBold = FontFactory.getFont(FontFactory.TIMES_BOLD, 12f)
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+    val timesNewRomanItalics = FontFactory.getFont(FontFactory.TIMES_ITALIC, 12f)
+
+    //
+    val role = Paragraph(experienceItem.experienceRole, timesNewRomanBold)
+    val workDate = Paragraph(experienceItem.experienceWorkDate, timesNewRomanPlain)
+
+
+    //SET 3
+    val boldLocation = Chunk(experienceItem.experienceCompanyName + " |", timesNewRomanBold)
+    val regularLocation = Chunk(" " + experienceItem.experienceCompanyLocation, timesNewRomanItalics)
+    val locationText = Paragraph("", timesNewRomanPlain)
+    locationText.add(boldLocation)
+    locationText.add(regularLocation)
+
+    //CLOSE
+    val section = Paragraph()
+    section.add(role)
+    section.add(workDate)
+    section.add(locationText)
+
+    return section
+}
+
+fun createExperienceSectionContent(experienceItem: ExperienceItem): Paragraph {
+    val timesNewRomanPlain = FontFactory.getFont(FontFactory.TIMES, 12f)
+
+    //SET 4
+    val bulletList = Paragraph("", timesNewRomanPlain)
+    for (nItem in experienceItem.experienceItemsList) {
+        val listItem = Chunk("•  $nItem\n", timesNewRomanPlain)
+        bulletList.add(listItem)
+    }
+    return bulletList
 }
 
 fun createEducationSection(item: EducationItem): Paragraph {
