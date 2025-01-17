@@ -2,6 +2,7 @@ package com.easit.pdfmaker.data
 
 import androidx.compose.ui.graphics.Color
 import com.easit.pdfmaker.R
+import com.easit.pdfmaker.constants.Constant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -75,27 +76,37 @@ val listTypeList = listOf(
 )
 
 val resumeStyleList = listOf(
-    ItemStyle("alphaStyle", "Modern", R.drawable.resume_template1),
-    ItemStyle("betaStyle", "Real", R.drawable.resume_template2),
+    ItemStyle("alphaStyle", "Real", R.drawable.resume_template1),
+    ItemStyle("betaStyle", "Modern", R.drawable.resume_template2),
     ItemStyle("deltaStyle", "Fine", R.drawable.resume_template3),
     ItemStyle("gammaStyle", "Dual 1", R.drawable.resume_template4),
-    ItemStyle("omegaStyle", "Dual 2", R.drawable.resume_template5),
+    ItemStyle("omegaStyle", "Dual 2", R.drawable.resume_template5)
 )
 
 val coverLetterStyleList = listOf(
-    ItemStyle("alphaStyle", "Not-Modern", R.drawable.resume_template1),
-    ItemStyle("betaStyle", "Not-Real", R.drawable.resume_template2),
+    ItemStyle("alphaStyle", "Not-Real", R.drawable.resume_template1),
+    ItemStyle("betaStyle", "Not-Modern", R.drawable.resume_template2),
     ItemStyle("deltaStyle", "Not-Fine", R.drawable.resume_template3),
     ItemStyle("gammaStyle", "Not-Dual 1", R.drawable.resume_template4),
-    ItemStyle("omegaStyle", "Not-Dual 2", R.drawable.resume_template5),
+    ItemStyle("omegaStyle", "Not-Dual 2", R.drawable.resume_template5)
 )
 
+val d = Color.Red
 val colorList = listOf(
     ColorData(name = "Black", tagColor = Color.Black, mainColor = ThemeColor.BLACK),
-    ColorData(name = "Red", tagColor = Color.Red, mainColor = ThemeColor.RED),
-    ColorData(name = "Green", tagColor = Color.Green, mainColor = ThemeColor.GREEN),
+    ColorData(name = "Red", tagColor = awtColorToComposeColor(Constant.RED), mainColor = ThemeColor.RED),
+    ColorData(name = "Green", tagColor = awtColorToComposeColor(Constant.GREEN), mainColor = ThemeColor.GREEN),
     ColorData(name = "Blue", tagColor = Color.Blue, mainColor = ThemeColor.BLUE),
-    ColorData(name = "Yellow", tagColor = Color.Yellow, mainColor = ThemeColor.YELLOW),
+    ColorData(name = "Yellow", tagColor = awtColorToComposeColor(Constant.YELLOW), mainColor = ThemeColor.YELLOW),
     ColorData(name = "Light-gray", tagColor = Color.LightGray, mainColor = ThemeColor.LIGHT_GRAY),
     ColorData(name = "Dark-gray", tagColor = Color.DarkGray, mainColor = ThemeColor.DARK_GRAY)
 )
+
+fun awtColorToComposeColor(awtColor: java.awt.Color): Color {
+    return Color(
+        red = awtColor.red / 255f,
+        green = awtColor.green / 255f,
+        blue = awtColor.blue / 255f,
+        alpha = awtColor.alpha / 255f
+    )
+}

@@ -731,7 +731,7 @@ fun splitList(
     listB.addAll(originalList.subList(middle, originalList.size))
 }
 
-fun splitListThree(
+fun splitListThreeOld(
     originalList: kotlin.collections.List<String>,
     listA: MutableList<String>,
     listB: MutableList<String>,
@@ -745,4 +745,16 @@ fun splitListThree(
     listB.addAll(originalList.subList(firstSplit, secondSplit))
     listC.addAll(originalList.subList(secondSplit, size))
 }
+
+fun splitListThree(originalList: kotlin.collections.List<String>, listA: MutableList<String>, listB: MutableList<String>, listC: MutableList<String>) {
+    val totalItems = originalList.size
+    val chunkSize = totalItems / 3
+    val remainder = totalItems % 3
+
+    // Distribute items into three lists
+    listA.addAll(originalList.subList(0, chunkSize + if (remainder > 0) 1 else 0))
+    listB.addAll(originalList.subList(listA.size, listA.size + chunkSize + if (remainder > 1) 1 else 0))
+    listC.addAll(originalList.subList(listA.size + listB.size, totalItems))
+}
+
 

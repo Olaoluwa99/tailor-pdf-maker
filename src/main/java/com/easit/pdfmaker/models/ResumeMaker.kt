@@ -1,6 +1,7 @@
 package com.easit.pdfmaker.models
 
 import android.util.Log
+import com.easit.pdfmaker.constants.Constant
 import com.easit.pdfmaker.data.ListFormat
 import com.easit.pdfmaker.data.ResumeData
 import com.easit.pdfmaker.data.Sections
@@ -48,21 +49,21 @@ class ResumeMaker(private val path: String){
         mainSectionList = sectionList
 
         mainThemeColor = when (themeColor){
-            ThemeColor.RED -> Color.RED
-            ThemeColor.GREEN -> Color.GREEN
+            ThemeColor.RED -> Constant.RED //Color.RED
+            ThemeColor.GREEN -> Constant.GREEN //Color.GREEN
             ThemeColor.BLACK -> Color.BLACK
-            ThemeColor.BLUE -> Color.BLUE
-            ThemeColor.YELLOW -> Color.YELLOW
+            ThemeColor.BLUE -> Color.BLUE //Constant.BLUE
+            ThemeColor.YELLOW -> Constant.YELLOW //Color.YELLOW
             ThemeColor.DARK_GRAY -> Color.DARK_GRAY
             ThemeColor.LIGHT_GRAY -> Color.LIGHT_GRAY
         }
 
         mainLinkColor = when (linkColor){
-            ThemeColor.RED -> Color.RED
-            ThemeColor.GREEN -> Color.GREEN
+            ThemeColor.RED -> Constant.RED //Color.RED
+            ThemeColor.GREEN -> Constant.GREEN //Color.GREEN
             ThemeColor.BLACK -> Color.BLACK
-            ThemeColor.BLUE -> Color.BLUE
-            ThemeColor.YELLOW -> Color.YELLOW
+            ThemeColor.BLUE -> Color.BLUE //Constant.BLUE
+            ThemeColor.YELLOW -> Constant.YELLOW //Color.YELLOW
             ThemeColor.DARK_GRAY -> Color.DARK_GRAY
             ThemeColor.LIGHT_GRAY -> Color.LIGHT_GRAY
         }
@@ -72,19 +73,19 @@ class ResumeMaker(private val path: String){
         hobbiesStyle = hobbiesFormatType
 
         when (styleType){
-            StyleType.ALPHA -> createTypeAlpha(item, onPdfCreated)
-            StyleType.BETA -> createTypeBeta(item, onPdfCreated)
-            StyleType.DELTA -> createTypeDelta(item, onPdfCreated)
-            StyleType.GAMMA -> createTypeGamma(item, onPdfCreated)
-            StyleType.OMEGA -> createTypeOmega()
+            StyleType.ALPHA -> createTypeSingle(item, styleType, onPdfCreated)
+            StyleType.BETA -> createTypeSingle(item, styleType, onPdfCreated)
+            StyleType.DELTA -> createTypeSingle(item, styleType, onPdfCreated)
+            StyleType.GAMMA -> createTypeSplit(item, styleType,onPdfCreated)
+            StyleType.OMEGA -> createTypeSplit(item, styleType,onPdfCreated)
         }
     }
 
-    private fun createTypeAlpha(item: ResumeData, onPdfCreated: () -> Unit){
+    private fun createTypeSingle(item: ResumeData, styleType: StyleType, onPdfCreated: () -> Unit){
         val document = Document(PageSize.A4)
-        val multiItemSpacing = 10f //5f;
+        val multiItemSpacing = 10f
         val nameSpacerAfter = 5f
-        val headerSpacingBefore = 10f
+        val headerSpacingBefore = 15f
 
         try {
             PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(path)))
@@ -93,19 +94,48 @@ class ResumeMaker(private val path: String){
             val timesNewRomanName = FontFactory.getFont(FontFactory.TIMES_BOLD, 24f)
 
             //HEADER
-            val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
-            val name = Paragraph(processedName, timesNewRomanName)
-            name.alignment = Element.ALIGN_RIGHT
-            name.spacingAfter = nameSpacerAfter
-            document.add(name)
+            when (styleType) {
+                StyleType.ALPHA -> {
+                    val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
+                    val name = Paragraph(processedName, timesNewRomanName)
+                    name.alignment = Element.ALIGN_CENTER
+                    name.spacingAfter = nameSpacerAfter
+                    document.add(name)
 
-            val contactItem = createContactDetailsSectionNarrow(
-                item.role, item.phone,
-                item.email, item.location,
-                item.link1, item.link2, mainLinkColor
-            )
-            contactItem.alignment = Element.ALIGN_RIGHT
-            document.add(contactItem)
+                    //HEADER
+                    val contactItem = createContactDetailsSection(
+                        item.name, item.role, item.phone,
+                        item.email, item.location,
+                        item.linkCover1, item.linkCover2,
+                        item.link1, item.link2, false, isUppercaseName, mainLinkColor
+                    )
+                    contactItem.alignment = Element.ALIGN_CENTER
+                    document.add(contactItem)
+                }
+                StyleType.BETA -> {
+                    val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
+                    val name = Paragraph(processedName, timesNewRomanName)
+                    name.alignment = Element.ALIGN_RIGHT
+                    name.spacingAfter = nameSpacerAfter
+                    document.add(name)
+
+                    val contactItem = createContactDetailsSectionNarrow(
+                        item.role, item.phone,
+                        item.email, item.location,
+                        item.link1, item.link2, mainLinkColor
+                    )
+                    contactItem.alignment = Element.ALIGN_RIGHT
+                    document.add(contactItem)
+                }
+                else -> {
+                    document.add(createContactDetailsSectionSplit(
+                        iName = item.name, iJobRole = item.role, iPhone = item.phone, iEmail = item.email,
+                        iLocation = item.location, iLink1 = item.link1, iLink2 = item.link2,
+                        linkColor = mainLinkColor, isUpperCase = isUppercaseName
+                    ))
+                }
+            }
+
 
             //OBJECTIVE
             if (mainSectionList.contains(Sections.OBJECTIVE)){
@@ -150,7 +180,6 @@ class ResumeMaker(private val path: String){
             //TECHNICAL SKILLS
             if (mainSectionList.contains(Sections.SKILLS)){
                 if (item.skillsList.isNotEmpty()) {
-                    //val skillsHeader = createHeader("TECHNICAL SKILLS")
                     if (toShowUnderline){
                         val skillsHeader =  createHeaderWithHorizontalLine("TECHNICAL SKILLS", mainThemeColor)
                         skillsHeader.spacingBefore = headerSpacingBefore
@@ -160,11 +189,6 @@ class ResumeMaker(private val path: String){
                         skillsHeader.spacingBefore = headerSpacingBefore
                         document.add(skillsHeader)
                     }
-
-                    /*var isLong = false
-                    for (i in item.skillsList) {
-                        isLong = i.length > 24
-                    }*/
 
                     when (skillsStyle){
                         ListFormat.FLOW_ROW -> document.add(createCombinedParagraphSection(item.skillsList))
@@ -295,9 +319,9 @@ class ResumeMaker(private val path: String){
 
     private fun createTypeBeta(item: ResumeData, onPdfCreated: () -> Unit){
         val document = Document(PageSize.A4)
-        val multiItemSpacing = 10f
+        val multiItemSpacing = 10f //5f;
         val nameSpacerAfter = 5f
-        val headerSpacingBefore = 10f
+        val headerSpacingBefore = 15f
 
         try {
             PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(path)))
@@ -308,18 +332,16 @@ class ResumeMaker(private val path: String){
             //HEADER
             val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
             val name = Paragraph(processedName, timesNewRomanName)
-            name.alignment = Element.ALIGN_CENTER
+            name.alignment = Element.ALIGN_RIGHT
             name.spacingAfter = nameSpacerAfter
             document.add(name)
 
-            //HEADER
-            val contactItem = createContactDetailsSection(
-                item.name, item.role, item.phone,
+            val contactItem = createContactDetailsSectionNarrow(
+                item.role, item.phone,
                 item.email, item.location,
-                item.linkCover1, item.linkCover2,
-                item.link1, item.link2, false, isUppercaseName, mainLinkColor
+                item.link1, item.link2, mainLinkColor
             )
-            contactItem.alignment = Element.ALIGN_CENTER
+            contactItem.alignment = Element.ALIGN_RIGHT
             document.add(contactItem)
 
             //OBJECTIVE
@@ -365,6 +387,7 @@ class ResumeMaker(private val path: String){
             //TECHNICAL SKILLS
             if (mainSectionList.contains(Sections.SKILLS)){
                 if (item.skillsList.isNotEmpty()) {
+                    //val skillsHeader = createHeader("TECHNICAL SKILLS")
                     if (toShowUnderline){
                         val skillsHeader =  createHeaderWithHorizontalLine("TECHNICAL SKILLS", mainThemeColor)
                         skillsHeader.spacingBefore = headerSpacingBefore
@@ -374,6 +397,11 @@ class ResumeMaker(private val path: String){
                         skillsHeader.spacingBefore = headerSpacingBefore
                         document.add(skillsHeader)
                     }
+
+                    /*var isLong = false
+                    for (i in item.skillsList) {
+                        isLong = i.length > 24
+                    }*/
 
                     when (skillsStyle){
                         ListFormat.FLOW_ROW -> document.add(createCombinedParagraphSection(item.skillsList))
@@ -706,7 +734,7 @@ class ResumeMaker(private val path: String){
         onPdfCreated()
     }
 
-    private fun createTypeGamma(item: ResumeData, onPdfCreated: () -> Unit){
+    private fun createTypeSplit(item: ResumeData, styleType: StyleType, onPdfCreated: () -> Unit){
         val document = Document(PageSize.A4)
         val multiItemSpacing = 10f //5f;
         val headerSpacingBefore = 10f
@@ -750,8 +778,11 @@ class ResumeMaker(private val path: String){
             val mainDualListTable = PdfPTable(3)
             mainDualListTable.setHeaderRows(0)
             mainDualListTable.widthPercentage = 100F
-            mainDualListTable.setWidths(intArrayOf(35, 5, 60))
-
+            if (styleType == StyleType.GAMMA){
+                mainDualListTable.setWidths(intArrayOf(35, 5, 60))
+            }else{
+                mainDualListTable.setWidths(intArrayOf(60, 5, 35))
+            }
             //
             mainDualListTable.setSpacingBefore(headerSpacingBefore)
 
@@ -931,28 +962,39 @@ class ResumeMaker(private val path: String){
             }
 
             //TODO - CLOSING
-            mainDualCell1.border = PdfPCell.NO_BORDER
-            mainDualCell1.setPadding(0f)
-            mainDualListTable.addCell(mainDualCell1)
+            if (styleType == StyleType.GAMMA){
+                mainDualCell1.border = PdfPCell.NO_BORDER
+                mainDualCell1.setPadding(0f)
+                mainDualListTable.addCell(mainDualCell1)
 
+                //
+                val mainDualCellBlank = PdfPCell()
+                mainDualCellBlank.border = PdfPCell.NO_BORDER
+                mainDualCellBlank.setPadding(0f)
+                mainDualListTable.addCell(mainDualCellBlank)
 
-            //
-            val mainDualCellBlank = PdfPCell()
-            mainDualCellBlank.border = PdfPCell.NO_BORDER
-            mainDualCellBlank.setPadding(0f)
-            mainDualListTable.addCell(mainDualCellBlank)
+                //
+                mainDualCell2.border = PdfPCell.NO_BORDER
+                mainDualCell2.setPadding(0f)
+                mainDualCell2.horizontalAlignment = Element.ALIGN_JUSTIFIED
+                mainDualListTable.addCell(mainDualCell2)
+            }else{
+                mainDualCell2.border = PdfPCell.NO_BORDER
+                mainDualCell2.setPadding(0f)
+                mainDualCell2.horizontalAlignment = Element.ALIGN_JUSTIFIED
+                mainDualListTable.addCell(mainDualCell2)
 
+                //
+                val mainDualCellBlank = PdfPCell()
+                mainDualCellBlank.border = PdfPCell.NO_BORDER
+                mainDualCellBlank.setPadding(0f)
+                mainDualListTable.addCell(mainDualCellBlank)
 
-            //
-            mainDualCell2.border = PdfPCell.NO_BORDER
-            mainDualCell2.setPadding(0f)
-            mainDualCell2.horizontalAlignment = Element.ALIGN_JUSTIFIED
-            mainDualListTable.addCell(mainDualCell2)
-
-
-            //mainDualListTable.addCell(mainDualCell2);
-            //
-            //mainDualListTable.setSpacingBefore(multiItemSpacing)
+                //
+                mainDualCell1.border = PdfPCell.NO_BORDER
+                mainDualCell1.setPadding(0f)
+                mainDualListTable.addCell(mainDualCell1)
+            }
             document.add(mainDualListTable)
         } catch (de: DocumentException) {
             println(de.message)

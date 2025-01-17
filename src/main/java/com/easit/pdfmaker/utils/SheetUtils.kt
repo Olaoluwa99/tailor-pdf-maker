@@ -28,12 +28,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FormatUnderlined
-import androidx.compose.material.icons.filled.FreeBreakfast
 import androidx.compose.material.icons.filled.InsertPageBreak
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.SevereCold
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -542,8 +539,7 @@ fun SelectStyle(
     onItemSelected: (StyleType) -> Unit,
     onDismiss: () -> Unit
 ) {
-
-    println("3 - $defaultSelectedStyle")
+    //
     var reload by remember { mutableIntStateOf(0) }
     var selectedIndex by remember { mutableIntStateOf(0) }
     var showStyleFullScreen by remember { mutableStateOf(false) }
@@ -559,8 +555,6 @@ fun SelectStyle(
             StyleType.GAMMA -> 3
             StyleType.OMEGA -> 4
         }
-        println("2 - $selectedStyleType")
-        //selectedStyleType = defaultSelectedStyle
         if (isCoverLetter){
             itemStyleList = coverLetterStyleList
             selectedExpandStyleImageId = R.drawable.resume_template1 //TODO - Change to default Cover letter Image Id
@@ -585,6 +579,7 @@ fun SelectStyle(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .verticalScroll(rememberScrollState())
         ) {
             key (reload){
@@ -700,6 +695,8 @@ fun ColorSelector(
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

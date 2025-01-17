@@ -320,7 +320,6 @@ fun ResultScreen(
                     )
                 }
                 SheetMode.STYLE -> {
-                    println("1 - $selectedStyleResume")
                     SelectStyle(
                         isCoverLetter = !isShowingResume,
                         defaultSelectedStyle = if (isShowingResume) selectedStyleResume else selectedStyleCoverLetter,
@@ -622,8 +621,7 @@ fun ResultScreen(
             }
         },
     ) { innerPadding ->
-
-        Row {
+        Row (modifier = Modifier.padding(bottom = (buttonHeightDp * 2) + 80.dp)/*(screenHeight/4).dp)*/){
             Box(
                 modifier = Modifier
                     .weight(1f),
