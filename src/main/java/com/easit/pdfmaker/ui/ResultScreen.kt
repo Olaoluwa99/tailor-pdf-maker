@@ -1,5 +1,6 @@
 package com.easit.pdfmaker.ui
 
+import android.app.Activity
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -18,9 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -57,8 +61,10 @@ import com.easit.pdfmaker.data.Sections
 import com.easit.pdfmaker.data.SheetMode
 import com.easit.pdfmaker.data.StyleType
 import com.easit.pdfmaker.data.ThemeColor
+import com.easit.pdfmaker.launchPdf
 import com.easit.pdfmaker.models.CoverLetterMaker
 import com.easit.pdfmaker.models.ResumeMaker
+import com.easit.pdfmaker.rememberReviewTask
 import com.easit.pdfmaker.savePdfToExternalStorage
 import com.easit.pdfmaker.utils.ColorSelector
 import com.easit.pdfmaker.utils.DefaultKeys
@@ -67,6 +73,7 @@ import com.easit.pdfmaker.utils.ResultFixItem
 import com.easit.pdfmaker.utils.ResultSelectionColumn
 import com.easit.pdfmaker.utils.SelectSections
 import com.easit.pdfmaker.utils.SelectStyle
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.rajat.pdfviewer.compose.PdfRendererViewCompose
 import kotlinx.coroutines.launch
 import java.io.File
@@ -83,7 +90,8 @@ fun ResultScreen(
     settings: PdfMakerSettingsReplica,
     onReturn: () -> Unit,
     onEditResume: (PdfUiData) -> Unit,
-    onEditCoverLetter: (PdfUiData) -> Unit
+    onEditCoverLetter: (PdfUiData) -> Unit,
+    onAnalyticsItemClicked: (Int) -> Unit
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -95,7 +103,11 @@ fun ResultScreen(
         onReturn()
     }
 
+    val reviewManager = remember { ReviewManagerFactory.create(context) }
+    val reviewInfo = rememberReviewTask(reviewManager)
+
     val screenHeight = LocalConfiguration.current.screenHeightDp
+    var savedPdfPath by remember { mutableStateOf("") }
     var resumeItemPath by remember { mutableStateOf("") }
     var coverLetterItemPath by remember { mutableStateOf("") }
     var hasFilesBeenRetrieved by remember { mutableStateOf(false) }
@@ -112,15 +124,15 @@ fun ResultScreen(
     var showUnderline by remember { mutableStateOf(true) }
     var isUpperCaseNameResume by remember { mutableStateOf(true) }
     var progressDialogVisible by remember { mutableStateOf(false) }
+    var showDownloadDialog by remember { mutableStateOf(false) }
 
     var buttonHeightDp by remember { mutableStateOf(30.dp) }
     var hasReloaded by remember { mutableIntStateOf(0) }
-    var hasReloadedCoverLetter by remember { mutableIntStateOf(0) }
+    //var hasReloadedCoverLetter by remember { mutableIntStateOf(0) }
 
     when (resultViewModel.delayCompleted.collectAsState().value){
         ReloadState.COMPLETED -> {
             progressDialogVisible = false
-            Toast.makeText(context, "Here & Now", Toast.LENGTH_SHORT).show()
             hasReloaded += 1
             resultViewModel.resetDelay()
         }
@@ -206,7 +218,7 @@ fun ResultScreen(
                         uppercaseName = isUpperCaseNameCoverLetter,
                         onPdfCreated = { hasFilesBeenRetrieved = true }
                     )
-                Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
             }catch (io: IOException){
                 println(io.localizedMessage)
                 io.printStackTrace()
@@ -274,6 +286,7 @@ fun ResultScreen(
                                     styleTypeCL = selectedStyleCoverLetter,
                                 )
                             )
+                            onAnalyticsItemClicked(1)
                         },
                         onEditCoverLetter = {
                             onEditCoverLetter(
@@ -294,19 +307,36 @@ fun ResultScreen(
                                     styleTypeCL = selectedStyleCoverLetter,
                                 )
                             )
+                            onAnalyticsItemClicked(1)
                         },
                         onDownloadClicked = {
+                            reviewInfo?.let {
+                                reviewManager.launchReviewFlow(context as Activity, reviewInfo)
+                            }
                             if (isOnlyCoverLetter){
-                                if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId")
+                                if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                    savedPdfPath = value
+                                    showDownloadDialog = true
+                                }
                             }else if (isOnlyResume){
-                                if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId")
+                                if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                    savedPdfPath = value
+                                    showDownloadDialog = true
+                                }
                             }else{
                                 if (isShowingResume){
-                                    if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId")
+                                    if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                        savedPdfPath = value
+                                        showDownloadDialog = true
+                                    }
                                 }else{
-                                    if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId")
+                                    if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                        savedPdfPath = value
+                                        showDownloadDialog = true
+                                    }
                                 }
                             }
+                            onAnalyticsItemClicked(2)
                         },
                         onFillBottomSheet = {
                             coroutineScope.launch {
@@ -316,6 +346,7 @@ fun ResultScreen(
                                     scaffoldState.bottomSheetState.partialExpand()
                                 }
                             }
+                            onAnalyticsItemClicked(3)
                         }
                     )
                 }
@@ -336,7 +367,7 @@ fun ResultScreen(
                                 selectedStyleResume = it
                             }else {
                                 selectedStyleCoverLetter = it
-                                Toast.makeText(context, it.name, Toast.LENGTH_LONG).show()
+                                //Toast.makeText(context, it.name, Toast.LENGTH_LONG).show()
                             }
 
                             sheetMode = SheetMode.DEFAULT
@@ -853,6 +884,46 @@ fun ResultScreen(
                     onActionCancel = {  }
                 )
             }
+
+            showDownloadDialog -> {
+                DownloadDialog(
+                    path = savedPdfPath,
+                    onDismiss = {
+                        showDownloadDialog = false
+                        savedPdfPath = "---"
+                    },
+                    onConfirm = {
+                        launchPdf(context, savedPdfPath)
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun DownloadDialog(
+    path: String,
+    isSuccess: Boolean = true,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { /* Do nothing */ },
+        title = { Text("Open PDF!") },
+        text = { Text("PDF saved to: $path. Select 'Open' to view your PDF file") },
+        modifier = Modifier.padding(16.dp),
+        confirmButton = {
+            OutlinedButton(onClick = { onDismiss() }) {
+                Text("Dismiss")
+            }
+        },
+        dismissButton = {
+            if (isSuccess){
+                Button(onClick = { onConfirm() }) {
+                    Text("Open")
+                }
+            }
+        }
+    )
 }

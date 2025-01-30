@@ -58,6 +58,9 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation(libs.compose.livedata)
 
+    implementation(libs.review.app)
+    implementation(libs.review.app.ktx)
+
     implementation(libs.pdf.viewer)
     implementation(libs.openpdf)
     implementation(libs.android.awt)

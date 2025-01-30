@@ -18,8 +18,15 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManager
 import java.io.File
 
 fun deserializeAllResultData(text: String): AllResultData {
@@ -37,7 +44,7 @@ fun serializeUser(data: PdfMakerUser): String{
     return serializedString
 }
 
-fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: String) {
+fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: String, onSaveCompleted: (String) -> Unit) {
     // Get the Documents directory path for all versions
     val documentsDir = File(Environment.getExternalStorageDirectory().absolutePath + "/Documents/TailoR-AI")
 
@@ -60,9 +67,11 @@ fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: Str
 
         // Notify the user the file was saved
         Toast.makeText(context, "PDF saved to: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
+        onSaveCompleted(pdfFile.absolutePath)
     } catch (e: Exception) {
         e.printStackTrace()
         Toast.makeText(context, "Failed to save PDF", Toast.LENGTH_SHORT).show()
+        onSaveCompleted("Failed to save PDF. Please try again.")
     }
 }
 
@@ -130,4 +139,42 @@ fun showPdfNotification(context: Context, pdfFilePath: String) {
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.notify(notificationId, notification)
+}
+
+fun launchPdf(context: Context, absolutePath: String) {
+    val file = File(absolutePath)
+    if (!file.exists()) {
+        return
+    }
+
+    val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+//        FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+    } else {
+        Uri.fromFile(file)
+    }
+
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "application/pdf")
+        flags = Intent.FLAG_ACTIVITY_NO_HISTORY or Intent.FLAG_GRANT_READ_URI_PERMISSION
+    }
+
+    try {
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+@Composable
+fun rememberReviewTask(reviewManager: ReviewManager): ReviewInfo? {
+    var reviewInfo: ReviewInfo? by remember {
+        mutableStateOf(null)
+    }
+    reviewManager.requestReviewFlow().addOnCompleteListener {
+        if (it.isSuccessful) {
+            reviewInfo = it.result
+        }
+    }
+    return reviewInfo
 }
