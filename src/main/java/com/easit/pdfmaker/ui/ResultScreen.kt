@@ -1,6 +1,9 @@
 package com.easit.pdfmaker.ui
 
+import android.Manifest
 import android.app.Activity
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -46,11 +49,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.easit.pdfmaker.LoadingDialog
 import com.easit.pdfmaker.NavigationIcon
 import com.easit.pdfmaker.R
+import com.easit.pdfmaker.constants.Constant
 import com.easit.pdfmaker.data.ListFormat
 import com.easit.pdfmaker.deserializeAllResultData
 import com.easit.pdfmaker.fileToByteArray
@@ -261,94 +267,107 @@ fun ResultScreen(
         sheetContent = {
             when (sheetMode) {
                 SheetMode.DEFAULT -> {
-                    DefaultKeys(
-                        isOnlyCoverLetter = isOnlyCoverLetter,
-                        isOnlyResume = isOnlyResume,
-                        keywords = resultViewModel.resultData.collectAsState().value.keywords,
-                        sendSheetPeekHeight = { buttonHeightDp = it },
-                        sendIsShowingResume = { isShowingResume = it },
-                        onEditResume = {
-                            onEditResume(
-                                PdfUiData(
-                                    isUnderlinedR = showUnderline,
-                                    isUppercaseNameR = isUpperCaseNameResume,
-                                    themeColorR = selectedThemeColorResume,
-                                    linkColorR = selectedLinkColorResume,
-                                    styleTypeR = selectedStyleResume,
-                                    sectionR = sectionList,
-                                    skillsListFormatR = skillFormatType,
-                                    softSkillsListFormatR = softSkillFormatType,
-                                    hobbiesListFormatR = hobbiesFormatType,
+                    key (isShowingResume){
+                        DefaultKeys(
+                            isShowingResume = isShowingResume,
+                            isOnlyCoverLetter = isOnlyCoverLetter,
+                            isOnlyResume = isOnlyResume,
+                            keywords = resultViewModel.resultData.collectAsState().value.keywords,
+                            sendSheetPeekHeight = { buttonHeightDp = it },
+                            sendIsShowingResume = { isShowingResume = it },
+                            onEditResume = {
+                                onEditResume(
+                                    PdfUiData(
+                                        isUnderlinedR = showUnderline,
+                                        isUppercaseNameR = isUpperCaseNameResume,
+                                        themeColorR = selectedThemeColorResume,
+                                        linkColorR = selectedLinkColorResume,
+                                        styleTypeR = selectedStyleResume,
+                                        sectionR = sectionList,
+                                        skillsListFormatR = skillFormatType,
+                                        softSkillsListFormatR = softSkillFormatType,
+                                        hobbiesListFormatR = hobbiesFormatType,
 
-                                    //
-                                    isUppercaseNameCL = isUpperCaseNameCoverLetter,
-                                    themeColorCL = selectedThemeColorCoverLetter,
-                                    styleTypeCL = selectedStyleCoverLetter,
+                                        //
+                                        isUppercaseNameCL = isUpperCaseNameCoverLetter,
+                                        themeColorCL = selectedThemeColorCoverLetter,
+                                        styleTypeCL = selectedStyleCoverLetter,
+                                    )
                                 )
-                            )
-                            onAnalyticsItemClicked(1)
-                        },
-                        onEditCoverLetter = {
-                            onEditCoverLetter(
-                                PdfUiData(
-                                    isUnderlinedR = showUnderline,
-                                    isUppercaseNameR = isUpperCaseNameResume,
-                                    themeColorR = selectedThemeColorResume,
-                                    linkColorR = selectedLinkColorResume,
-                                    styleTypeR = selectedStyleResume,
-                                    sectionR = sectionList,
-                                    skillsListFormatR = skillFormatType,
-                                    softSkillsListFormatR = softSkillFormatType,
-                                    hobbiesListFormatR = hobbiesFormatType,
+                                onAnalyticsItemClicked(1)
+                            },
+                            onEditCoverLetter = {
+                                onEditCoverLetter(
+                                    PdfUiData(
+                                        isUnderlinedR = showUnderline,
+                                        isUppercaseNameR = isUpperCaseNameResume,
+                                        themeColorR = selectedThemeColorResume,
+                                        linkColorR = selectedLinkColorResume,
+                                        styleTypeR = selectedStyleResume,
+                                        sectionR = sectionList,
+                                        skillsListFormatR = skillFormatType,
+                                        softSkillsListFormatR = softSkillFormatType,
+                                        hobbiesListFormatR = hobbiesFormatType,
 
-                                    //
-                                    isUppercaseNameCL = isUpperCaseNameCoverLetter,
-                                    themeColorCL = selectedThemeColorCoverLetter,
-                                    styleTypeCL = selectedStyleCoverLetter,
+                                        //
+                                        isUppercaseNameCL = isUpperCaseNameCoverLetter,
+                                        themeColorCL = selectedThemeColorCoverLetter,
+                                        styleTypeCL = selectedStyleCoverLetter,
+                                    )
                                 )
-                            )
-                            onAnalyticsItemClicked(1)
-                        },
-                        onDownloadClicked = {
-                            reviewInfo?.let {
-                                reviewManager.launchReviewFlow(context as Activity, reviewInfo)
-                            }
-                            if (isOnlyCoverLetter){
-                                if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
-                                    savedPdfPath = value
-                                    showDownloadDialog = true
+                                onAnalyticsItemClicked(1)
+                            },
+                            onDownloadClicked = {
+                                reviewInfo?.let {
+                                    reviewManager.launchReviewFlow(context as Activity, reviewInfo)
                                 }
-                            }else if (isOnlyResume){
-                                if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
-                                    savedPdfPath = value
-                                    showDownloadDialog = true
+                                val activity = (context as? Activity)
+                                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                    if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                        != PackageManager.PERMISSION_GRANTED) {
+                                        if (activity != null) {
+                                            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 9191)
+                                        }
+                                    }
                                 }
-                            }else{
-                                if (isShowingResume){
+
+                                if (isOnlyCoverLetter){
+                                    if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                        savedPdfPath = value
+                                        showDownloadDialog = true
+                                    }
+                                }else if (isOnlyResume){
                                     if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
                                         savedPdfPath = value
                                         showDownloadDialog = true
                                     }
                                 }else{
-                                    if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
-                                        savedPdfPath = value
-                                        showDownloadDialog = true
+                                    if (isShowingResume){
+                                        if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                            savedPdfPath = value
+                                            showDownloadDialog = true
+                                        }
+                                    }else{
+                                        if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                            savedPdfPath = value
+                                            showDownloadDialog = true
+                                        }
                                     }
                                 }
-                            }
-                            onAnalyticsItemClicked(2)
-                        },
-                        onFillBottomSheet = {
-                            coroutineScope.launch {
-                                if (it){
-                                    scaffoldState.bottomSheetState.expand()
-                                }else{
-                                    scaffoldState.bottomSheetState.partialExpand()
+                                onAnalyticsItemClicked(2)
+                            },
+                            onFillBottomSheet = {
+                                coroutineScope.launch {
+                                    if (it){
+                                        scaffoldState.bottomSheetState.expand()
+                                    }else{
+                                        scaffoldState.bottomSheetState.partialExpand()
+                                    }
                                 }
+                                onAnalyticsItemClicked(3)
                             }
-                            onAnalyticsItemClicked(3)
-                        }
-                    )
+                        )
+                    }
                 }
                 SheetMode.STYLE -> {
                     SelectStyle(
@@ -748,6 +767,7 @@ fun ResultScreen(
                         modifier = Modifier.padding(top = 36.dp, end = 8.dp)
                     ){
                         ResultFixItem(
+                            buttonAlpha = Constant.VISIBILITY_ALPHA,
                             imageVector = Icons.Default.Visibility,
                             "Show panel",
                             onAction = { showEditSection = true }
@@ -888,6 +908,7 @@ fun ResultScreen(
             showDownloadDialog -> {
                 DownloadDialog(
                     path = savedPdfPath,
+                    isSuccess = savedPdfPath != Constant.FAILED_DOWNLOAD,
                     onDismiss = {
                         showDownloadDialog = false
                         savedPdfPath = "---"
@@ -908,10 +929,16 @@ fun DownloadDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
+    var mainText by remember { mutableStateOf("PDF saved to: $path. Select 'Open' to view your PDF file") }
+
+    if (path == Constant.FAILED_DOWNLOAD){
+        mainText = "Failed to save PDF please try again later."
+    }
+
     AlertDialog(
-        onDismissRequest = { /* Do nothing */ },
-        title = { Text("Open PDF!") },
-        text = { Text("PDF saved to: $path. Select 'Open' to view your PDF file") },
+        onDismissRequest = { onDismiss() },
+        title = { Text("Download PDF!") },
+        text = { Text(mainText) },
         modifier = Modifier.padding(16.dp),
         confirmButton = {
             OutlinedButton(onClick = { onDismiss() }) {

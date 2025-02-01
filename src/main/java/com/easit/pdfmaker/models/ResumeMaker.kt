@@ -139,7 +139,7 @@ class ResumeMaker(private val path: String){
 
             //OBJECTIVE
             if (mainSectionList.contains(Sections.OBJECTIVE)){
-                if (item.objective != null) {
+                if (!item.objective.isNullOrBlank()) {
                     if (toShowUnderline){
                         val objectiveHeader =  createHeaderWithHorizontalLine("OBJECTIVE", mainThemeColor)
                         objectiveHeader.spacingBefore = multiItemSpacing*2f
@@ -159,7 +159,7 @@ class ResumeMaker(private val path: String){
 
             //EXPERIENCE
             if (mainSectionList.contains(Sections.EXPERIENCE)){
-                if (item.experienceList != null) {
+                if (!item.experienceList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val experienceHeader =  createHeaderWithHorizontalLine("EXPERIENCE", mainThemeColor)
                         experienceHeader.spacingBefore = headerSpacingBefore
@@ -201,7 +201,7 @@ class ResumeMaker(private val path: String){
 
             //SOFT SKILLS
             if (mainSectionList.contains(Sections.SOFT_SKILLS)){
-                if (item.softSkillsList != null) {
+                if (!item.softSkillsList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val softSkillsHeader =  createHeaderWithHorizontalLine("SOFT SKILLS", mainThemeColor)
                         softSkillsHeader.spacingBefore = headerSpacingBefore
@@ -223,7 +223,7 @@ class ResumeMaker(private val path: String){
 
             //EDUCATION
             if (mainSectionList.contains(Sections.EDUCATION)){
-                if (item.educationList != null) {
+                if (!item.educationList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val educationHeader =  createHeaderWithHorizontalLine("EDUCATION", mainThemeColor)
                         educationHeader.spacingBefore = headerSpacingBefore
@@ -245,7 +245,7 @@ class ResumeMaker(private val path: String){
 
             //PROJECT
             if (mainSectionList.contains(Sections.PROJECT)){
-                if (item.projectList != null) {
+                if (!item.projectList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val projectsHeader =  createHeaderWithHorizontalLine("PROJECTS", mainThemeColor)
                         projectsHeader.spacingBefore = headerSpacingBefore
@@ -267,7 +267,7 @@ class ResumeMaker(private val path: String){
 
             //CERTIFICATIONS
             if (mainSectionList.contains(Sections.CERTIFICATIONS)){
-                if (item.certificationList != null) {
+                if (!item.certificationList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val certificationsHeader =  createHeaderWithHorizontalLine("CERTIFICATIONS", mainThemeColor)
                         certificationsHeader.spacingBefore = headerSpacingBefore
@@ -284,7 +284,7 @@ class ResumeMaker(private val path: String){
 
             //HOBBIES
             if (mainSectionList.contains(Sections.HOBBIES)){
-                if (item.hobbiesList != null) {
+                if (!item.hobbiesList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val hobbiesHeader =  createHeaderWithHorizontalLine("HOBBIES", mainThemeColor)
                         hobbiesHeader.spacingBefore = headerSpacingBefore
@@ -349,15 +349,13 @@ class ResumeMaker(private val path: String){
                     //
                     val objectiveItem = createObjectiveSection(item.objective)
                     objectiveItem.alignment = Element.ALIGN_JUSTIFIED
-                    //objectiveItem.spacingBefore = multiItemSpacing*1.5f
                     objectiveItem.spacingAfter = multiItemSpacing*1.5f
                     document.add(objectiveItem)
                 }
             }
-            //
 
 
-            //TODO - TABLE START
+            //--TABLE START
             val mainDualListTable = PdfPTable(3)
             mainDualListTable.setHeaderRows(0)
             mainDualListTable.widthPercentage = 100F
@@ -377,18 +375,16 @@ class ResumeMaker(private val path: String){
             //
             val mainDualCell1 = PdfPCell()
 
-            //TODO - ADD ZONE - 1
+            //ZONE - 1
             //EDUCATION
             if (mainSectionList.contains(Sections.EDUCATION)){
-                if (item.educationList != null) {
+                if (!item.educationList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val educationHeader =  createHeaderWithHorizontalLine("EDUCATION", mainThemeColor)
                         educationHeader.spacingBefore = headerSpacingBefore
-                        //document.add(educationHeader)
                         mainDualCell1.addElement(educationHeader)
                     }else {
                         val educationHeader = createHeader("EDUCATION")
-                        //educationHeader.spacingBefore = headerSpacingBefore
                         mainDualCell1.addElement(educationHeader)
                     }
 
@@ -400,7 +396,6 @@ class ResumeMaker(private val path: String){
                         }else{
                             educationText.spacingAfter = multiItemSpacing*1.5f
                         }
-                        //document.add(educationText)
                         mainDualCell1.addElement(educationText)
                     }
                 }
@@ -414,12 +409,10 @@ class ResumeMaker(private val path: String){
                     if (toShowUnderline){
                         val skillsHeader =  createHeaderWithHorizontalLine("TECHNICAL SKILLS", mainThemeColor)
                         skillsHeader.spacingBefore = headerSpacingBefore
-                        //document.add(skillsHeader)
                         mainDualCell1.addElement(skillsHeader)
                     }else {
                         val skillsHeader = createHeader("TECHNICAL SKILLS")
                         skillsHeader.spacingBefore = headerSpacingBefore
-                        //document.add(skillsHeader)
                         mainDualCell1.addElement(skillsHeader)
                     }
 
@@ -439,16 +432,14 @@ class ResumeMaker(private val path: String){
 
             //SOFT SKILLS
             if (mainSectionList.contains(Sections.SOFT_SKILLS)){
-                if (item.softSkillsList != null) {
+                if (!item.softSkillsList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val softSkillsHeader =  createHeaderWithHorizontalLine("SOFT SKILLS", mainThemeColor)
                         softSkillsHeader.spacingBefore = headerSpacingBefore
-                        //document.add(softSkillsHeader)
                         mainDualCell1.addElement(softSkillsHeader)
                     }else {
                         val softSkillsHeader = createHeader("SOFT SKILLS")
                         softSkillsHeader.spacingBefore = headerSpacingBefore
-                        //document.add(softSkillsHeader)
                         mainDualCell1.addElement(softSkillsHeader)
                     }
                     when (softSkillsStyle){
@@ -456,33 +447,28 @@ class ResumeMaker(private val path: String){
                             val x = createCombinedParagraphSection(item.softSkillsList)
                             x.spacingAfter = multiItemSpacing
                             mainDualCell1.addElement(x)
-                            //mainDualCell1.addElement(createCombinedParagraphSection(item.softSkillsList))
                         }
                         ListFormat.SINGLE_COLUMN -> mainDualCell1.addElement(createSingleColumnSectionSplit(item.softSkillsList))
                         ListFormat.DOUBLE_COLUMN -> mainDualCell1.addElement(createSingleColumnSectionSplit(item.softSkillsList))
                         ListFormat.TRIPLE_COLUMN -> mainDualCell1.addElement(createSingleColumnSectionSplit(item.softSkillsList))
                     }
-                    //document.add(createDualColumnSection(item.softSkillsList))
                 }
             }
 
 
             //HOBBIES
             if (mainSectionList.contains(Sections.HOBBIES)){
-                if (item.hobbiesList != null) {
+                if (!item.hobbiesList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val hobbiesHeader =  createHeaderWithHorizontalLine("HOBBIES", mainThemeColor)
                         hobbiesHeader.spacingBefore = headerSpacingBefore
-                        //document.add(hobbiesHeader)
                         mainDualCell1.addElement(hobbiesHeader)
                     }else {
                         val hobbiesHeader = createHeader("HOBBIES")
                         hobbiesHeader.spacingBefore = headerSpacingBefore
-                        //document.add(hobbiesHeader)
                         mainDualCell1.addElement(hobbiesHeader)
                     }
                     //
-                    //document.add(createDualColumnSection(item.hobbiesList))
                     when (hobbiesStyle){
                         ListFormat.FLOW_ROW -> mainDualCell1.addElement(createCombinedParagraphSection(item.hobbiesList))
                         ListFormat.SINGLE_COLUMN -> mainDualCell1.addElement(createSingleColumnSectionSplit(item.hobbiesList))
@@ -493,22 +479,20 @@ class ResumeMaker(private val path: String){
             }
 
 
-            //SET 2
+            //ZONE 2
             //
             val mainDualCell2 = PdfPCell()
 
             //EXPERIENCE
             if (mainSectionList.contains(Sections.EXPERIENCE)){
-                if (item.experienceList != null) {
+                if (!item.experienceList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val experienceHeader =  createHeaderWithHorizontalLine("EXPERIENCE", mainThemeColor)
                         experienceHeader.spacingBefore = headerSpacingBefore
-                        //document.add(experienceHeader)
                         mainDualCell2.addElement(experienceHeader)
                     }else {
                         val experienceHeader = createHeader("EXPERIENCE")
                         experienceHeader.spacingBefore = headerSpacingBefore
-                        //document.add(experienceHeader)
                         mainDualCell2.addElement(experienceHeader)
                     }
                     for(experienceItem in item.experienceList){
@@ -521,7 +505,6 @@ class ResumeMaker(private val path: String){
                         val expContent = createExperienceSectionContent(experienceItem)
                         expContent.alignment = Element.ALIGN_JUSTIFIED
                         expContent.spacingAfter = multiItemSpacing
-                        //if (experienceItem != item.experienceList[item.experienceList.size-1]) expContent.spacingAfter = multiItemSpacing
                         mainDualCell2.addElement(expContent)
                     }
                 }
@@ -529,7 +512,7 @@ class ResumeMaker(private val path: String){
 
             //CERTIFICATIONS
             if (mainSectionList.contains(Sections.CERTIFICATIONS)){
-                if (item.certificationList != null) {
+                if (!item.certificationList.isNullOrEmpty()) {
                     if (toShowUnderline){
                         val certificationsHeader =  createHeaderWithHorizontalLine("CERTIFICATIONS", mainThemeColor)
                         certificationsHeader.spacingBefore = headerSpacingBefore
@@ -544,7 +527,7 @@ class ResumeMaker(private val path: String){
                 }
             }
 
-            //TODO - CLOSING
+            //CLOSING
             if (styleType == StyleType.GAMMA){
                 mainDualCell1.border = PdfPCell.NO_BORDER
                 mainDualCell1.setPadding(0f)

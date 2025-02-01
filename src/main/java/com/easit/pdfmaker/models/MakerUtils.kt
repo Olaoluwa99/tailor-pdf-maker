@@ -68,25 +68,29 @@ fun createContactDetailsSection(
     //Links
     val links = Paragraph()
     if (iLink1 != null && iLinkCover1 != null) {
-        val link1 = Anchor(iLink1, linkFont)
-        link1.reference = iLink1
-        links.add(Chunk("$iLinkCover1: ", timesNewRomanPlain))
-        links.add(link1)
+        if (iLink1.isNotBlank() && iLinkCover1.isNotBlank()){
+            val link1 = Anchor(iLink1, linkFont)
+            link1.reference = iLink1
+            links.add(Chunk("$iLinkCover1: ", timesNewRomanPlain))
+            links.add(link1)
+        }
     }
     if (iLink2 != null && iLinkCover2 != null) {
-        val link2 = Anchor(iLink2, linkFont)
-        link2.reference = iLink2
-        //
-        if (!isSplitLink!!) {
-            if (iLink1 != null && iLinkCover1 != null) {
-                links.add(Chunk(" | ", timesNewRomanPlain))
+        if (iLink2.isNotBlank() && iLinkCover2.isNotBlank()){
+            val link2 = Anchor(iLink2, linkFont)
+            link2.reference = iLink2
+            //
+            if (!isSplitLink) {
+                if (iLink1 != null && iLinkCover1 != null) {
+                    links.add(Chunk(" | ", timesNewRomanPlain))
+                }
+                links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
+                links.add(link2)
+            } else {
+                links.add(Chunk.NEWLINE)
+                links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
+                links.add(link2)
             }
-            links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
-            links.add(link2)
-        } else {
-            links.add(Chunk.NEWLINE)
-            links.add(Chunk("$iLinkCover2: ", timesNewRomanPlain))
-            links.add(link2)
         }
     }
     links.setAlignment("Center")

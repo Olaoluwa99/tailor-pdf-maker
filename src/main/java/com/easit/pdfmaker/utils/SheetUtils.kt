@@ -78,6 +78,7 @@ import com.easit.pdfmaker.data.resumeStyleList
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DefaultKeys(
+    isShowingResume: Boolean,
     isOnlyResume: Boolean = false,
     isOnlyCoverLetter: Boolean = false,
     keywords: List<String>,
@@ -89,7 +90,7 @@ fun DefaultKeys(
     onDownloadClicked: () -> Unit
 ) {
 
-    var isShowingResume by remember { mutableStateOf(true) }
+    //var isShowingResume by remember { mutableStateOf(true) }
     val localDensity = LocalDensity.current
     var buttonHeightDp by remember { mutableStateOf(0.dp) }
     val iconSize by remember { mutableIntStateOf(16) }
@@ -98,6 +99,23 @@ fun DefaultKeys(
     var keywordAction by remember { mutableStateOf("View") }
     var isBottomSheetFull by remember { mutableStateOf(false) }
     var showKeywordsSection by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = 0) {
+        when (isShowingResume){
+            false -> {
+                //isShowingResume = true
+                //sendIsShowingResume(true)
+                actionButtonText = "Cover letter"
+                nonActionButtonText = "Resume"
+            }
+            true -> {
+                //isShowingResume = false
+                //sendIsShowingResume(false)
+                actionButtonText = "Resume"
+                nonActionButtonText = "Cover letter"
+            }
+        }
+    }
 
     //
     Column(
@@ -116,12 +134,12 @@ fun DefaultKeys(
                     contentPadding = PaddingValues(vertical = 16.dp),
                     onClick = {
                         if (isShowingResume){
-                            isShowingResume = false
+                            //isShowingResume = false
                             sendIsShowingResume(false)
                             actionButtonText = "Cover letter"
                             nonActionButtonText = "Resume"
                         }else{
-                            isShowingResume = true
+                            //isShowingResume = true
                             sendIsShowingResume(true)
                             actionButtonText = "Resume"
                             nonActionButtonText = "Cover letter"
@@ -544,7 +562,7 @@ fun SelectStyle(
     var selectedIndex by remember { mutableIntStateOf(0) }
     var showStyleFullScreen by remember { mutableStateOf(false) }
     var selectedStyleType by remember { mutableStateOf(defaultSelectedStyle) }
-    var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.resume_template1) }
+    var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.alpha_resume) }
     var itemStyleList by remember { mutableStateOf(emptyList<ItemStyle>()) }
 
     LaunchedEffect(key1 = 0) {
@@ -557,7 +575,7 @@ fun SelectStyle(
         }
         if (isCoverLetter){
             itemStyleList = coverLetterStyleList
-            selectedExpandStyleImageId = R.drawable.resume_template1 //TODO - Change to default Cover letter Image Id
+            selectedExpandStyleImageId = R.drawable.alpha_letter
         }else itemStyleList = resumeStyleList
     }
 
@@ -791,8 +809,9 @@ fun ResultSelectionColumn(
     ) {
         //
         ResultFixItem(
+            buttonAlpha = Constant.VISIBILITY_ALPHA,
             imageVector = Icons.Default.VisibilityOff,
-            "Hide panel",
+            title = "Hide panel",
             onAction = {onHideClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
@@ -800,7 +819,7 @@ fun ResultSelectionColumn(
         if (!isShowingCoverLetter){
             ResultFixItem(
                 imageVector = Icons.Default.InsertPageBreak,
-                "Sections",
+                title = "Sections",
                 onAction = {onSectionsClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
@@ -808,14 +827,14 @@ fun ResultSelectionColumn(
 
         ResultFixItem(
             imageVector = Icons.Default.AutoFixHigh,
-            "Style",
+            title = "Style",
             onAction = {onStyleClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
 
         ResultFixItem(
             imageVector = Icons.Default.Palette,
-            "Color",
+            title = "Color",
             onAction = {onColorClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
@@ -823,14 +842,14 @@ fun ResultSelectionColumn(
         if (!isShowingCoverLetter){
             ResultFixItem(
                 imageVector = Icons.Default.Palette,
-                "Link Color",
+                title = "Link Color",
                 onAction = {onLinkColorClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
 
             ResultFixItem(
                 imageVector = Icons.Default.FormatUnderlined,
-                "Underline",
+                title = "Underline",
                 onAction = {onUnderlineClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
@@ -838,7 +857,7 @@ fun ResultSelectionColumn(
 
         ResultFixItem(
             imageVector = Icons.Default.SortByAlpha,
-            "Name Case",
+            title = "Name Case",
             onAction = {onNameCaseClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))
@@ -846,21 +865,21 @@ fun ResultSelectionColumn(
         if (!isShowingCoverLetter){
             ResultFixItem(
                 imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                "Skills",
+                title = "Skills",
                 onAction = {onSkillsClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
 
             ResultFixItem(
                 imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                "Soft skills",
+                title = "Soft skills",
                 onAction = {onSoftSkillsClicked()}
             )
             Spacer(modifier = Modifier.height(spacing))
 
             ResultFixItem(
                 imageVector = Icons.AutoMirrored.Filled.ListAlt,
-                "Hobbies",
+                title = "Hobbies",
                 onAction = {onHobbiesClicked()}
             )
         }

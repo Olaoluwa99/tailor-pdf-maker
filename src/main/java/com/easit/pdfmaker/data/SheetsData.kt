@@ -78,19 +78,19 @@ val listTypeList = listOf(
 )
 
 val resumeStyleList = listOf(
-    ItemStyle("alphaStyle", "Real", R.drawable.resume_template1),
-    ItemStyle("betaStyle", "Modern", R.drawable.resume_template2),
-    ItemStyle("deltaStyle", "Fine", R.drawable.resume_template3),
-    ItemStyle("gammaStyle", "Dual 1", R.drawable.resume_template4),
-    ItemStyle("omegaStyle", "Dual 2", R.drawable.resume_template5)
+    ItemStyle("alphaStyle", "Professional", R.drawable.alpha_resume),
+    ItemStyle("betaStyle", "Classic", R.drawable.beta_resume),
+    ItemStyle("deltaStyle", "Innovative", R.drawable.delta_resume),
+    ItemStyle("gammaStyle", "Core", R.drawable.gamma_resume),
+    ItemStyle("omegaStyle", "Reverse Core", R.drawable.omega_resume)
 )
 
 val coverLetterStyleList = listOf(
-    ItemStyle("alphaStyle", "Not-Real", R.drawable.resume_template1),
-    ItemStyle("betaStyle", "Not-Modern", R.drawable.resume_template2),
-    ItemStyle("deltaStyle", "Not-Fine", R.drawable.resume_template3),
-    ItemStyle("gammaStyle", "Not-Dual 1", R.drawable.resume_template4),
-    ItemStyle("omegaStyle", "Not-Dual 2", R.drawable.resume_template5)
+    ItemStyle("alphaStyle", "Bold", R.drawable.alpha_letter),
+    ItemStyle("betaStyle", "Elegant", R.drawable.beta_letter),
+    ItemStyle("deltaStyle", "Modern", R.drawable.delta_letter),
+    ItemStyle("gammaStyle", "Clean", R.drawable.gamma_letter),
+    ItemStyle("omegaStyle", "Dynamic", R.drawable.omega_letter)
 )
 
 val d = Color.Red

@@ -249,6 +249,7 @@ fun StyleImageFullScreen(
 
 @Composable
 fun ResultFixItem(
+    buttonAlpha: Float = 1f,
     imageVector: ImageVector,
     title: String,
     onAction: ()-> Unit
@@ -259,7 +260,7 @@ fun ResultFixItem(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = buttonAlpha))
                 .clickable { onAction() }
                 .padding(16.dp),
             contentAlignment = Alignment.Center
