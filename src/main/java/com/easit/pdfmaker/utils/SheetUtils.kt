@@ -1,6 +1,7 @@
 package com.easit.pdfmaker.utils
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -89,8 +90,7 @@ fun DefaultKeys(
     onEditCoverLetter: () -> Unit,
     onDownloadClicked: () -> Unit
 ) {
-
-    //var isShowingResume by remember { mutableStateOf(true) }
+    //
     val localDensity = LocalDensity.current
     var buttonHeightDp by remember { mutableStateOf(0.dp) }
     val iconSize by remember { mutableIntStateOf(16) }
@@ -103,14 +103,10 @@ fun DefaultKeys(
     LaunchedEffect(key1 = 0) {
         when (isShowingResume){
             false -> {
-                //isShowingResume = true
-                //sendIsShowingResume(true)
                 actionButtonText = "Cover letter"
                 nonActionButtonText = "Resume"
             }
             true -> {
-                //isShowingResume = false
-                //sendIsShowingResume(false)
                 actionButtonText = "Resume"
                 nonActionButtonText = "Cover letter"
             }
@@ -563,6 +559,7 @@ fun SelectStyle(
     var showStyleFullScreen by remember { mutableStateOf(false) }
     var selectedStyleType by remember { mutableStateOf(defaultSelectedStyle) }
     var selectedExpandStyleImageId by remember { mutableIntStateOf(R.drawable.alpha_resume) }
+    var selectedExpandStyleImageIdLarge by remember { mutableIntStateOf(R.drawable.alpha_resume_large) }
     var itemStyleList by remember { mutableStateOf(emptyList<ItemStyle>()) }
 
     LaunchedEffect(key1 = 0) {
@@ -576,6 +573,7 @@ fun SelectStyle(
         if (isCoverLetter){
             itemStyleList = coverLetterStyleList
             selectedExpandStyleImageId = R.drawable.alpha_letter
+            selectedExpandStyleImageIdLarge = R.drawable.alpha_letter_large
         }else itemStyleList = resumeStyleList
     }
 
@@ -605,7 +603,6 @@ fun SelectStyle(
                     modifier = Modifier
                         .safeDrawingPadding()
                         .fillMaxWidth(1f)
-                        //.padding(16.dp)
                         .wrapContentHeight(align = Alignment.Top),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalArrangement = Arrangement.SpaceAround,//spacedBy(8.dp),
@@ -643,18 +640,21 @@ fun SelectStyle(
                             },
                             onFillScreen = {
                                 selectedExpandStyleImageId = resumeStyle.image
+                                selectedExpandStyleImageIdLarge = resumeStyle.largeImage
                                 showStyleFullScreen = true
                             }
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
         
         when {
             showStyleFullScreen -> {
                 StyleImageFullScreen(
-                    imageId = selectedExpandStyleImageId,
+                    imageId = selectedExpandStyleImageIdLarge,
                     onDismiss = { showStyleFullScreen = false }
                 )
             }

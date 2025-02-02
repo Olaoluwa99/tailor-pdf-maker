@@ -39,7 +39,8 @@ fun serializePdfUiData(data: PdfUiData): String{
 data class ItemStyle(
     val tag: String,
     val title: String,
-    val image: Int
+    val image: Int,
+    val largeImage: Int
 )
 
 data class ListTypeData(
@@ -78,19 +79,19 @@ val listTypeList = listOf(
 )
 
 val resumeStyleList = listOf(
-    ItemStyle("alphaStyle", "Professional", R.drawable.alpha_resume),
-    ItemStyle("betaStyle", "Classic", R.drawable.beta_resume),
-    ItemStyle("deltaStyle", "Innovative", R.drawable.delta_resume),
-    ItemStyle("gammaStyle", "Core", R.drawable.gamma_resume),
-    ItemStyle("omegaStyle", "Reverse Core", R.drawable.omega_resume)
+    ItemStyle("alphaStyle", "Professional", R.drawable.alpha_resume, R.drawable.alpha_resume_large),
+    ItemStyle("betaStyle", "Classic", R.drawable.beta_resume, R.drawable.beta_resume_large),
+    ItemStyle("deltaStyle", "Innovative", R.drawable.delta_resume, R.drawable.delta_resume_large),
+    ItemStyle("gammaStyle", "Core", R.drawable.gamma_resume, R.drawable.gamma_resume_large),
+    ItemStyle("omegaStyle", "Reverse Core", R.drawable.omega_resume, R.drawable.omega_resume_large)
 )
 
 val coverLetterStyleList = listOf(
-    ItemStyle("alphaStyle", "Bold", R.drawable.alpha_letter),
-    ItemStyle("betaStyle", "Elegant", R.drawable.beta_letter),
-    ItemStyle("deltaStyle", "Modern", R.drawable.delta_letter),
-    ItemStyle("gammaStyle", "Clean", R.drawable.gamma_letter),
-    ItemStyle("omegaStyle", "Dynamic", R.drawable.omega_letter)
+    ItemStyle("alphaStyle", "Bold", R.drawable.alpha_letter, R.drawable.alpha_letter_large),
+    ItemStyle("betaStyle", "Elegant", R.drawable.beta_letter, R.drawable.beta_letter_large),
+    ItemStyle("deltaStyle", "Modern", R.drawable.delta_letter, R.drawable.delta_letter_large),
+    ItemStyle("gammaStyle", "Clean", R.drawable.gamma_letter, R.drawable.gamma_letter_large),
+    ItemStyle("omegaStyle", "Dynamic", R.drawable.omega_letter, R.drawable.omega_letter_large)
 )
 
 val d = Color.Red
