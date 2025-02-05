@@ -48,65 +48,6 @@ fun serializeUser(data: PdfMakerUser): String{
     return serializedString
 }
 
-fun savePdfToExternalStorageOld(context: Context, pdfData: ByteArray, fileName: String, onSaveCompleted: (String) -> Unit) {
-    // Get the Documents directory path for all versions
-    val documentsDir = File(Environment.getExternalStorageDirectory().absolutePath + "/Documents/TailoR-AI")
-
-    // Create the directory if it doesn't exist
-    if (!documentsDir.exists()) {
-        documentsDir.mkdirs()
-    }
-
-    // Create the PDF file in the Documents directory
-    val pdfFile = File(documentsDir, "$fileName.pdf")
-
-    try {
-        val outputStream: OutputStream = FileOutputStream(pdfFile)
-        outputStream.write(pdfData)
-        outputStream.flush()
-        outputStream.close()
-
-        //
-        showPdfNotification(context, pdfFile.absolutePath)
-
-        // Notify the user the file was saved
-        Toast.makeText(context, "PDF saved to: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
-        onSaveCompleted(pdfFile.absolutePath)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Toast.makeText(context, "Failed to save PDF", Toast.LENGTH_SHORT).show()
-        onSaveCompleted(Constant.FAILED_DOWNLOAD)
-    }
-}
-
-fun savePdfToExternalStorageOld2(context: Context, pdfData: ByteArray, fileName: String, onSaveCompleted: (String) -> Unit) {
-    val documentsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-
-    if (documentsDir == null) {
-        Toast.makeText(context, "Failed to access storage", Toast.LENGTH_SHORT).show()
-        onSaveCompleted(Constant.FAILED_DOWNLOAD)
-        return
-    }
-
-    val pdfFile = File(documentsDir, "$fileName.pdf")
-
-    try {
-        pdfFile.outputStream().use { it.write(pdfData) }
-
-        // Show notification
-        showPdfNotification(context, pdfFile.absolutePath)
-
-        // Notify the user
-        Toast.makeText(context, "PDF saved to: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
-        onSaveCompleted(pdfFile.absolutePath)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Toast.makeText(context, "Failed to save PDF", Toast.LENGTH_SHORT).show()
-        onSaveCompleted(Constant.FAILED_DOWNLOAD)
-    }
-}
-
-
 fun fileToByteArray(file: File): ByteArray? {
     return try {
         file.readBytes()
@@ -126,7 +67,7 @@ fun requestPermissions(context: Context) {
     }
 }
 
-fun showPdfNotification(context: Context, pdfFilePath: String) {
+fun showPdfNotification(context: Context, pdfFilePath: String, tag: String) {
     val channelId = "pdf_notification_channel"
     val notificationId = 1001
 
@@ -161,8 +102,8 @@ fun showPdfNotification(context: Context, pdfFilePath: String) {
     // Build the Notification
     val notification = NotificationCompat.Builder(context, channelId)
         .setSmallIcon(android.R.drawable.ic_menu_view)
-        .setContentTitle("Open PDF")
-        .setContentText("Tap to view your PDF file")
+        .setContentTitle("Download Complete - ($tag)")
+        .setContentText("Your PDF has been successfully downloaded. Tap to open.")
         .setContentIntent(pendingIntent)
         .setAutoCancel(true)
         .build()
@@ -211,20 +152,6 @@ fun rememberReviewTask(reviewManager: ReviewManager): ReviewInfo? {
     return reviewInfo
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: String, onSaveCompleted: (String) -> Unit) {
     val fileNameWithExtension = "$fileName.pdf"
 
@@ -237,7 +164,7 @@ fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: Str
     }
 
     if (savedFilePath != null) {
-        showPdfNotification(context, savedFilePath)
+        showPdfNotification(context, savedFilePath, fileName)
         Toast.makeText(context, "PDF saved to: $savedFilePath", Toast.LENGTH_LONG).show()
         onSaveCompleted(savedFilePath)
     } else {
@@ -249,46 +176,6 @@ fun savePdfToExternalStorage(context: Context, pdfData: ByteArray, fileName: Str
 /**
  * Save PDF in Android 10+ using MediaStore API
  */
-@RequiresApi(Build.VERSION_CODES.Q)
-private fun savePdfUsingMediaStoreOld(context: Context, pdfData: ByteArray, fileName: String): String? {
-    val contentValues = ContentValues().apply {
-        put(MediaStore.Downloads.DISPLAY_NAME, fileName)
-        put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
-        put(MediaStore.Downloads.RELATIVE_PATH, "Documents/TailoR-AI/")
-    }
-
-    val resolver = context.contentResolver
-    val uri: Uri? = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-
-    uri?.let {
-        resolver.openOutputStream(it)?.use { outputStream ->
-            outputStream.write(pdfData)
-        }
-        return getFilePathFromUri(context, uri)
-    }
-    return null
-}
-
-/*@RequiresApi(Build.VERSION_CODES.Q)
-private fun savePdfUsingMediaStore(context: Context, pdfData: ByteArray, fileName: String): String? {
-    val contentValues = ContentValues().apply {
-        put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
-        put(MediaStore.Files.FileColumns.MIME_TYPE, "application/pdf")
-        put(MediaStore.Files.FileColumns.RELATIVE_PATH, "Documents/TailoR-AI/") // Allowed in Android 10+
-    }
-
-    val resolver = context.contentResolver
-    val uri: Uri? = resolver.insert(MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL), contentValues)
-
-    uri?.let {
-        resolver.openOutputStream(it)?.use { outputStream ->
-            outputStream.write(pdfData)
-        }
-        return getFilePathFromUri(context, uri)
-    }
-    return null
-}*/
-
 @RequiresApi(Build.VERSION_CODES.Q)
 private fun savePdfUsingMediaStore(context: Context, pdfData: ByteArray, fileName: String): String? {
     val resolver = context.contentResolver

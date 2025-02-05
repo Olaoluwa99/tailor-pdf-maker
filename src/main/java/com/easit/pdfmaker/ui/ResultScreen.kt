@@ -125,7 +125,7 @@ fun ResultScreen(
 
     //
     var skillFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
-    var softSkillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var softSkillFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
     var hobbiesFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
     var showUnderline by remember { mutableStateOf(true) }
     var isUpperCaseNameResume by remember { mutableStateOf(true) }
@@ -325,32 +325,59 @@ fun ResultScreen(
                                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                         != PackageManager.PERMISSION_GRANTED) {
+                                        savedPdfPath = Constant.FAILED_PERMISSION
                                         if (activity != null) {
                                             ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 9191)
                                         }
-                                    }
-                                }
-
-                                if (isOnlyCoverLetter){
-                                    if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
-                                        savedPdfPath = value
                                         showDownloadDialog = true
-                                    }
-                                }else if (isOnlyResume){
-                                    if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
-                                        savedPdfPath = value
-                                        showDownloadDialog = true
+                                        //Toast.makeText(context, "Please tap the Download button again after granting the required permissions.", Toast.LENGTH_LONG).show()
+                                    }else{
+                                        if (isOnlyCoverLetter){
+                                            if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                                savedPdfPath = value
+                                                showDownloadDialog = true
+                                            }
+                                        }else if (isOnlyResume){
+                                            if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                                savedPdfPath = value
+                                                showDownloadDialog = true
+                                            }
+                                        }else{
+                                            if (isShowingResume){
+                                                if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                                    savedPdfPath = value
+                                                    showDownloadDialog = true
+                                                }
+                                            }else{
+                                                if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                                    savedPdfPath = value
+                                                    showDownloadDialog = true
+                                                }
+                                            }
+                                        }
                                     }
                                 }else{
-                                    if (isShowingResume){
+                                    if (isOnlyCoverLetter){
+                                        if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                            savedPdfPath = value
+                                            showDownloadDialog = true
+                                        }
+                                    }else if (isOnlyResume){
                                         if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
                                             savedPdfPath = value
                                             showDownloadDialog = true
                                         }
                                     }else{
-                                        if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
-                                            savedPdfPath = value
-                                            showDownloadDialog = true
+                                        if (isShowingResume){
+                                            if (outputResumeFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputResumeFile!!)!!, "RES-$tagId") { value ->
+                                                savedPdfPath = value
+                                                showDownloadDialog = true
+                                            }
+                                        }else{
+                                            if (outputCoverLetterFile != null)  savePdfToExternalStorage(context, fileToByteArray(outputCoverLetterFile!!)!!, "COV-$tagId") { value ->
+                                                savedPdfPath = value
+                                                showDownloadDialog = true
+                                            }
                                         }
                                     }
                                 }
@@ -908,7 +935,7 @@ fun ResultScreen(
             showDownloadDialog -> {
                 DownloadDialog(
                     path = savedPdfPath,
-                    isSuccess = savedPdfPath != Constant.FAILED_DOWNLOAD,
+                    isSuccess = savedPdfPath != Constant.FAILED_DOWNLOAD && savedPdfPath != Constant.FAILED_PERMISSION,
                     onDismiss = {
                         showDownloadDialog = false
                         savedPdfPath = "---"
@@ -933,6 +960,9 @@ fun DownloadDialog(
 
     if (path == Constant.FAILED_DOWNLOAD){
         mainText = "Failed to save PDF please try again later."
+    }
+    if (path == Constant.FAILED_PERMISSION){
+        mainText = "Please tap the Download button again after granting the required permissions."
     }
 
     AlertDialog(

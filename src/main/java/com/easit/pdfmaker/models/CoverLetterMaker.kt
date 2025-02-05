@@ -60,21 +60,17 @@ class CoverLetterMaker(private val path: String){
 
             val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
             val name = createHeader(processedName, 24f, null)
-            //name.alignment = Element.ALIGN_RIGHT
             document.add(name)
 
             val role = createSubHeader(item.role, 16f)
-            //role.alignment = Element.ALIGN_RIGHT
             document.add(role)
 
             document.add(Paragraph("  "))
 
             val location = createMain(item.location)
-            //location.alignment = Element.ALIGN_RIGHT
             document.add(location)
 
             val date = createMain(item.date)
-            //date.alignment = Element.ALIGN_RIGHT
             document.add(date)
 
             //
@@ -83,8 +79,8 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createHeader(item.hiringManagerName, 12f, null))
             document.add(createMain(item.companyName))
+            if (item.companyAddress.isNotBlank()) document.add(createMain(item.companyAddress))
             document.add(createMain(item.companyLocation))
-            document.add(createMain(item.companyAddress))
             //
             document.add(Paragraph("  "))
 
@@ -131,12 +127,7 @@ class CoverLetterMaker(private val path: String){
 
             val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
             val name = createHeaderWithHorizontalLine(processedName, mainThemeColor,headerFont)
-            //name.alignment = Element.ALIGN_RIGHT
             document.add(name)
-
-            /*val role = createSubHeader(item.role, 16f)
-            //role.alignment = Element.ALIGN_RIGHT
-            document.add(role)*/
 
             //
             document.add(createMain(item.role))
@@ -150,14 +141,13 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createMainBold(item.hiringManagerName))
             document.add(createMain(item.companyName))
+            if (item.companyAddress.isNotBlank()) document.add(createMain(item.companyAddress))
             document.add(createMain(item.companyLocation))
-            document.add(createMain(item.companyAddress))
             //
             document.add(Paragraph("  "))
 
             //
             val salutation = createMain("${item.hiringManagerSalute},")
-            //salutation.spacingBefore = spacing
             salutation.spacingAfter = spacing
             document.add(salutation)
 
@@ -191,7 +181,6 @@ class CoverLetterMaker(private val path: String){
         try {
             PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(path)))
             document.open()
-            //val headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 24f)
 
             val processedName: String = if (isUppercaseName) item.name.uppercase() else item.name
             val name = createHeader(processedName, 24f, null)
@@ -202,16 +191,6 @@ class CoverLetterMaker(private val path: String){
             val dual = createMain("${item.role}  •  ${item.location}")
             dual.alignment = Element.ALIGN_RIGHT
             document.add(dual)
-
-            /*//Role
-            val role = createMain(item.role)
-            role.alignment = Element.ALIGN_RIGHT
-            document.add(role)
-
-            //Location
-            val location = createMain(item.location)
-            location.alignment = Element.ALIGN_RIGHT
-            document.add(location)*/
 
 
             //Date
@@ -224,14 +203,13 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createMainBold(item.hiringManagerName))
             document.add(createMain(item.companyName))
+            if (item.companyAddress.isNotBlank()) document.add(createMain(item.companyAddress))
             document.add(createMain(item.companyLocation))
-            document.add(createMain(item.companyAddress))
             //
             document.add(Paragraph("  "))
 
             //
             val salutation = createMain("${item.hiringManagerSalute},")
-            //salutation.spacingBefore = spacing
             salutation.spacingAfter = spacing
             document.add(salutation)
 
@@ -288,8 +266,8 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createHeader(item.hiringManagerName, 12f, null))
             document.add(createMain(item.companyName))
+            if (item.companyAddress.isNotBlank()) document.add(createMain(item.companyAddress))
             document.add(createMain(item.companyLocation))
-            document.add(createMain(item.companyAddress))
             //
             document.add(Paragraph("  "))
 
@@ -308,8 +286,6 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createMain(item.closingSalutation))
 
-            //
-            //document.add(Paragraph("   "))
             //
             document.add(createMain(item.closingName))
 
@@ -340,7 +316,6 @@ class CoverLetterMaker(private val path: String){
             document.add(name)
 
             //Dual
-            //document.add(createHorizontalLine(mainThemeColor))
             val dual = createSubHeader("${item.role}  •  ${item.location}", 16f)
             dual.alignment = Element.ALIGN_CENTER
             document.add(dual)
@@ -356,8 +331,8 @@ class CoverLetterMaker(private val path: String){
             //
             document.add(createHeader(item.hiringManagerName, 12f, null))
             document.add(createMain(item.companyName))
+            if (item.companyAddress.isNotBlank()) document.add(createMain(item.companyAddress))
             document.add(createMain(item.companyLocation))
-            document.add(createMain(item.companyAddress))
             //
             document.add(Paragraph("  "))
 

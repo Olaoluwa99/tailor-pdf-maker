@@ -14,7 +14,8 @@ object Constant {
     const val DIALOG_RADIUS = 12
     const val SHEET_HEADER_SPACING = 72
 
-    const val FAILED_DOWNLOAD = "Failed to save PDF. Please try again."
+    const val FAILED_DOWNLOAD = "FAILED_DOWNLOAD"
+    const val FAILED_PERMISSION = "FAILED_PERMISSION"
     const val VISIBILITY_ALPHA = 0.6f
 
 

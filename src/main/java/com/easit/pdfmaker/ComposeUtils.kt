@@ -26,9 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.easit.pdfmaker.constants.Constant
-import com.easit.pdfmaker.helper.currentConnectivityStatus
-import com.easit.pdfmaker.helper.observeConnectivityAsFlow
-import com.easit.tailor.helper.ConnectionStatus
 
 @Composable
 fun UploadButton(
@@ -42,15 +39,6 @@ fun UploadButton(
         icon = { Icon(Icons.Rounded.Upload, text) },
         text = { Text(text = text) },
     )
-}
-
-@Composable
-fun connectivityStatus(): State<ConnectionStatus> {
-    val context = LocalContext.current
-
-    return produceState(initialValue = context.currentConnectivityStatus) {
-        context.observeConnectivityAsFlow().collect{ value = it }
-    }
 }
 
 @Composable
