@@ -1,16 +1,9 @@
 package com.easit.pdfmaker
 
-import android.Manifest
-import android.app.Activity
 import android.os.Environment
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import com.easit.pdfmaker.data.AllResultData
-import com.easit.pdfmaker.data.PdfMakerUser
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.FileOutputStream
-import java.io.OutputStream
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -38,32 +31,12 @@ fun deserializeAllResultData(text: String): AllResultData {
     return data
 }
 
-fun serializeAllResultData(data: AllResultData): String{
-    val serializedString: String = Json.encodeToString(data)
-    return serializedString
-}
-
-fun serializeUser(data: PdfMakerUser): String{
-    val serializedString: String = Json.encodeToString(data)
-    return serializedString
-}
-
 fun fileToByteArray(file: File): ByteArray? {
     return try {
         file.readBytes()
     } catch (e: Exception) {
         e.printStackTrace()
         null  // Return null if there was an error reading the file
-    }
-}
-
-fun requestPermissions(context: Context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        ActivityCompat.requestPermissions(
-            context as Activity,
-            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-            9999//REQUEST_CODE
-        )
     }
 }
 

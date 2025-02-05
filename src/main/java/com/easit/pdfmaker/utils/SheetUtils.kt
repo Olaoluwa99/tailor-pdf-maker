@@ -811,7 +811,7 @@ fun ResultSelectionColumn(
         ResultFixItem(
             buttonAlpha = Constant.VISIBILITY_ALPHA,
             imageVector = Icons.Default.VisibilityOff,
-            title = "Hide panel",
+            title = "Hide Edit",
             onAction = {onHideClicked()}
         )
         Spacer(modifier = Modifier.height(spacing))

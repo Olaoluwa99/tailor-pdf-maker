@@ -243,6 +243,7 @@ fun ResultScreen(
     var sheetMode by remember { mutableStateOf(SheetMode.DEFAULT) }
     var isShowingResume by remember { mutableStateOf(true) }
     var showEditSection by remember { mutableStateOf(false) }
+    var hasShownEditSection by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = 0) { if (isOnlyCoverLetter) isShowingResume =false }
 
 
@@ -274,7 +275,10 @@ fun ResultScreen(
                             isOnlyResume = isOnlyResume,
                             keywords = resultViewModel.resultData.collectAsState().value.keywords,
                             sendSheetPeekHeight = { buttonHeightDp = it },
-                            sendIsShowingResume = { isShowingResume = it },
+                            sendIsShowingResume = {
+                                isShowingResume = it
+                                onAnalyticsItemClicked(0)
+                            },
                             onEditResume = {
                                 onEditResume(
                                     PdfUiData(
@@ -796,8 +800,14 @@ fun ResultScreen(
                         ResultFixItem(
                             buttonAlpha = Constant.VISIBILITY_ALPHA,
                             imageVector = Icons.Default.Visibility,
-                            "Show panel",
-                            onAction = { showEditSection = true }
+                            title = "Show Edit",
+                            onAction = {
+                                showEditSection = true
+                                if (!hasShownEditSection){
+                                    onAnalyticsItemClicked(4)
+                                    hasShownEditSection = true
+                                }
+                            }
                         )
                     }
                 }
