@@ -124,9 +124,9 @@ fun ResultScreen(
     var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, Sections.EXPERIENCE, Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
 
     //
-    var skillFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
-    var softSkillFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
-    var hobbiesFormatType by remember { mutableStateOf(ListFormat.DOUBLE_COLUMN) }
+    var skillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var softSkillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }
+    var hobbiesFormatType by remember { mutableStateOf(ListFormat.TRIPLE_COLUMN) }
     var showUnderline by remember { mutableStateOf(true) }
     var isUpperCaseNameResume by remember { mutableStateOf(true) }
     var progressDialogVisible by remember { mutableStateOf(false) }
