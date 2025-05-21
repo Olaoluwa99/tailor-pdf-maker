@@ -147,7 +147,7 @@ fun ResultScreen(
     }
 
     //  Cover letter
-    var selectedStyleCoverLetter by remember { mutableStateOf(StyleType.ALPHA) }
+    var selectedStyleCoverLetter by remember { mutableStateOf(StyleType.BETA) }
     var selectedThemeColorCoverLetter by remember { mutableStateOf(ThemeColor.BLACK) }
     var isUpperCaseNameCoverLetter by remember { mutableStateOf(true) }
 
