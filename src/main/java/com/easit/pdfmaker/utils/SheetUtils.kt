@@ -787,9 +787,8 @@ fun ListFormatSheet(
  * RESULT COLUMN
  * */
 @Composable
-fun ResultSelectionColumn(
+fun ResultSelectionRow(
     isShowingCoverLetter: Boolean,
-    onHideClicked: ()-> Unit,
     onStyleClicked: ()-> Unit,
     onColorClicked: ()-> Unit,
     onLinkColorClicked: ()-> Unit,
@@ -803,18 +802,11 @@ fun ResultSelectionColumn(
 ){
     val spacing by remember { mutableStateOf(12.dp) }
     //
-    Column(
-        modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row (
+        //modifier = Modifier.fillMaxHeight().verticalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        //
-        ResultFixItem(
-            buttonAlpha = Constant.VISIBILITY_ALPHA,
-            imageVector = Icons.Default.VisibilityOff,
-            title = "Hide Edit",
-            onAction = {onHideClicked()}
-        )
-        Spacer(modifier = Modifier.height(spacing))
+        Spacer(modifier = Modifier.width(extraSpacing.dp))
 
         if (!isShowingCoverLetter){
             ResultFixItem(
@@ -822,7 +814,7 @@ fun ResultSelectionColumn(
                 title = "Sections",
                 onAction = {onSectionsClicked()}
             )
-            Spacer(modifier = Modifier.height(spacing))
+            Spacer(modifier = Modifier.width(spacing))
         }
 
         ResultFixItem(
@@ -830,14 +822,14 @@ fun ResultSelectionColumn(
             title = "Style",
             onAction = {onStyleClicked()}
         )
-        Spacer(modifier = Modifier.height(spacing))
+        Spacer(modifier = Modifier.width(spacing))
 
         ResultFixItem(
             imageVector = Icons.Default.Palette,
             title = "Color",
             onAction = {onColorClicked()}
         )
-        Spacer(modifier = Modifier.height(spacing))
+        Spacer(modifier = Modifier.width(spacing))
 
         if (!isShowingCoverLetter){
             ResultFixItem(
@@ -845,14 +837,14 @@ fun ResultSelectionColumn(
                 title = "Link Color",
                 onAction = {onLinkColorClicked()}
             )
-            Spacer(modifier = Modifier.height(spacing))
+            Spacer(modifier = Modifier.width(spacing))
 
             ResultFixItem(
                 imageVector = Icons.Default.FormatUnderlined,
                 title = "Underline",
                 onAction = {onUnderlineClicked()}
             )
-            Spacer(modifier = Modifier.height(spacing))
+            Spacer(modifier = Modifier.width(spacing))
         }
 
         ResultFixItem(
@@ -860,7 +852,7 @@ fun ResultSelectionColumn(
             title = "Name Case",
             onAction = {onNameCaseClicked()}
         )
-        Spacer(modifier = Modifier.height(spacing))
+        Spacer(modifier = Modifier.width(spacing))
 
         if (!isShowingCoverLetter){
             ResultFixItem(
@@ -868,14 +860,14 @@ fun ResultSelectionColumn(
                 title = "Skills",
                 onAction = {onSkillsClicked()}
             )
-            Spacer(modifier = Modifier.height(spacing))
+            Spacer(modifier = Modifier.width(spacing))
 
             ResultFixItem(
                 imageVector = Icons.AutoMirrored.Filled.ListAlt,
                 title = "Soft skills",
                 onAction = {onSoftSkillsClicked()}
             )
-            Spacer(modifier = Modifier.height(spacing))
+            Spacer(modifier = Modifier.width(spacing))
 
             ResultFixItem(
                 imageVector = Icons.AutoMirrored.Filled.ListAlt,
@@ -884,10 +876,7 @@ fun ResultSelectionColumn(
             )
         }
 
-        if (!isShowingCoverLetter){
-            //Half a Page
-            Spacer(modifier = Modifier.height(extraSpacing.dp))
-        }
+        Spacer(modifier = Modifier.width(extraSpacing.dp))
 
     }
 }

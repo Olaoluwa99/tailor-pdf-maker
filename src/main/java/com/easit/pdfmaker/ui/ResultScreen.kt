@@ -7,25 +7,23 @@ import android.os.Build
 import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -45,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -75,8 +72,7 @@ import com.easit.pdfmaker.savePdfToExternalStorage
 import com.easit.pdfmaker.utils.ColorSelector
 import com.easit.pdfmaker.utils.DefaultKeys
 import com.easit.pdfmaker.utils.ListFormatSheet
-import com.easit.pdfmaker.utils.ResultFixItem
-import com.easit.pdfmaker.utils.ResultSelectionColumn
+import com.easit.pdfmaker.utils.ResultSelectionRow
 import com.easit.pdfmaker.utils.SelectSections
 import com.easit.pdfmaker.utils.SelectStyle
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -111,8 +107,6 @@ fun ResultScreen(
 
     val reviewManager = remember { ReviewManagerFactory.create(context) }
     val reviewInfo = rememberReviewTask(reviewManager)
-
-    val screenHeight = LocalConfiguration.current.screenHeightDp
     var savedPdfPath by remember { mutableStateOf("") }
     var resumeItemPath by remember { mutableStateOf("") }
     var coverLetterItemPath by remember { mutableStateOf("") }
@@ -224,7 +218,6 @@ fun ResultScreen(
                         uppercaseName = isUpperCaseNameCoverLetter,
                         onPdfCreated = { hasFilesBeenRetrieved = true }
                     )
-                //Toast.makeText(context, "--Success--", Toast.LENGTH_SHORT).show()
             }catch (io: IOException){
                 println(io.localizedMessage)
                 io.printStackTrace()
@@ -242,8 +235,6 @@ fun ResultScreen(
     //
     var sheetMode by remember { mutableStateOf(SheetMode.DEFAULT) }
     var isShowingResume by remember { mutableStateOf(true) }
-    var showEditSection by remember { mutableStateOf(false) }
-    var hasShownEditSection by remember { mutableStateOf(false) }
     LaunchedEffect(key1 = 0) { if (isOnlyCoverLetter) isShowingResume =false }
 
 
@@ -258,7 +249,7 @@ fun ResultScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = if (!settings.extremeAmoledMode) MaterialTheme.colorScheme.surfaceContainerHigh else Color.Black
                 ),
-                title = { Text(""/*"Resume & Cover letter"*/) },
+                title = { Text("") },
                 navigationIcon = {
                     NavigationIcon { onReturn() }
                 },
@@ -410,7 +401,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         },
                         onItemSelected = {
                             if (isShowingResume){
@@ -424,7 +414,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
 
                             if (isShowingResume){
@@ -466,7 +455,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -491,7 +479,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
@@ -507,7 +494,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
 
                             if (isShowingResume){
@@ -543,7 +529,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
@@ -556,7 +541,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -571,7 +555,6 @@ fun ResultScreen(
                                     styleType = selectedStyleResume,
                                     sectionList = sectionList,
                                     onPdfCreated = {
-                                        //hasReloaded += hasReloaded
                                         resultViewModel.delayTimer(5000)
                                     }
                                 )
@@ -581,7 +564,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
@@ -595,7 +577,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -619,7 +600,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
@@ -633,7 +613,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -657,7 +636,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
@@ -671,7 +649,6 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = false
                             progressDialogVisible = true
                             ResumeMaker(resumeItemPath)
                                 .createResume(
@@ -695,159 +672,45 @@ fun ResultScreen(
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.partialExpand()
                             }
-                            showEditSection = true
                         }
                     )
                 }
             }
         },
     ) { innerPadding ->
-        Row (modifier = Modifier.padding(bottom = (buttonHeightDp * 2) + 80.dp)/*(screenHeight/4).dp)*/){
-            Box(
+        Column (
+            modifier = Modifier
+                .padding(
+                    top = 16.dp,
+                    bottom = (buttonHeightDp * 2) + 80.dp)
+        ){
+            LazyRow (
                 modifier = Modifier
-                    .weight(1f),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .padding(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = 16.dp,
-                            start = 8.dp,
-                            end = 8.dp
-                        )
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(36.dp))
-
-                    //
-                    if (hasFilesBeenRetrieved){
-                        if (resumeItemPath.isNotBlank()){
-                            if (isOnlyCoverLetter){
-                                if (outputCoverLetterFile!!.exists()){
-                                    Box(
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                            .padding(2.dp)
-                                    ){
-                                        key(hasReloaded){
-                                            PdfRendererViewCompose(
-                                                file = outputCoverLetterFile,
-                                                lifecycleOwner = LocalLifecycleOwner.current
-                                            )
-                                        }
-                                    }
-                                }
-                            }else if(isOnlyResume){
-                                if (outputResumeFile!!.exists()){
-                                    Box(
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                            .padding(2.dp)
-                                    ){
-                                        key(hasReloaded){
-                                            PdfRendererViewCompose(
-                                                file = outputResumeFile,
-                                                lifecycleOwner = LocalLifecycleOwner.current
-                                            )
-                                        }
-                                    }
-                                }
-                            }else{
-                                if (isShowingResume){
-                                    if (outputResumeFile!!.exists()){
-                                        Box(
-                                            modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                                .padding(2.dp)
-                                        ){
-                                            key(hasReloaded){
-                                                PdfRendererViewCompose(
-                                                    file = outputResumeFile,
-                                                    lifecycleOwner = LocalLifecycleOwner.current
-                                                )
-                                            }
-                                        }
-                                    }
-                                }else{
-                                    if (outputCoverLetterFile!!.exists()){
-                                        Box(
-                                            modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                                                .padding(2.dp)
-                                        ){
-                                            key(hasReloaded){
-                                                PdfRendererViewCompose(
-                                                    file = outputCoverLetterFile,
-                                                    lifecycleOwner = LocalLifecycleOwner.current
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!showEditSection){
-                    Box(
-                        modifier = Modifier.padding(top = 36.dp, end = 8.dp)
-                    ){
-                        ResultFixItem(
-                            buttonAlpha = Constant.VISIBILITY_ALPHA,
-                            imageVector = Icons.Default.Visibility,
-                            title = "Show Edit",
-                            onAction = {
-                                showEditSection = true
-                                if (!hasShownEditSection){
-                                    onAnalyticsItemClicked(4)
-                                    hasShownEditSection = true
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-
-            AnimatedVisibility (showEditSection){
-                Column (
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(end = 8.dp)
-                ){
-                    Spacer(modifier = Modifier.height(36.dp))
-                    ResultSelectionColumn(
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+            ){
+                item {
+                    ResultSelectionRow(
                         isShowingCoverLetter = !isShowingResume,
-                        onHideClicked = { showEditSection = false },
                         onStyleClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.STYLE
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
                         onSectionsClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.SECTION
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
                         onColorClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.COLOR
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
                         onLinkColorClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.LINK_COLOR
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
@@ -856,7 +719,6 @@ fun ResultScreen(
                         onUnderlineClicked = {
                             progressDialogVisible = true
                             showUnderline = !showUnderline
-                            showEditSection = false
                             ResumeMaker(resumeItemPath)
                                 .createResume(
                                     item = resultViewModel.resultData.value.resume!!,
@@ -878,7 +740,6 @@ fun ResultScreen(
                         onNameCaseClicked = {
                             progressDialogVisible = true
                             if (isShowingResume) isUpperCaseNameResume = !isUpperCaseNameResume else isUpperCaseNameCoverLetter = !isUpperCaseNameCoverLetter
-                            showEditSection = false
                             if (isShowingResume){
                                 ResumeMaker(resumeItemPath)
                                     .createResume(
@@ -908,28 +769,112 @@ fun ResultScreen(
                             }
                         },
                         onSkillsClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.SKILLS
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
                         onSoftSkillsClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.SOFT_SKILLS
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
                         onHobbiesClicked = {
-                            showEditSection = false
                             sheetMode = SheetMode.HOBBIES
                             coroutineScope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }
                         },
-                        extraSpacing = screenHeight/2
+                        extraSpacing = 8
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(
+                        top = innerPadding.calculateTopPadding(),
+                        start = 8.dp,
+                        end = 8.dp
+                    )
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                //
+                if (hasFilesBeenRetrieved){
+                    if (resumeItemPath.isNotBlank()){
+                        if (isOnlyCoverLetter){
+                            if (outputCoverLetterFile!!.exists()){
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                        .padding(2.dp)
+                                ){
+                                    key(hasReloaded){
+                                        PdfRendererViewCompose(
+                                            file = outputCoverLetterFile,
+                                            lifecycleOwner = LocalLifecycleOwner.current
+                                        )
+                                    }
+                                }
+                            }
+                        }else if(isOnlyResume){
+                            if (outputResumeFile!!.exists()){
+                                Box(
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                        .padding(2.dp)
+                                ){
+                                    key(hasReloaded){
+                                        PdfRendererViewCompose(
+                                            file = outputResumeFile,
+                                            lifecycleOwner = LocalLifecycleOwner.current
+                                        )
+                                    }
+                                }
+                            }
+                        }else{
+                            if (isShowingResume){
+                                if (outputResumeFile!!.exists()){
+                                    Box(
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(2.dp)
+                                    ){
+                                        key(hasReloaded){
+                                            PdfRendererViewCompose(
+                                                file = outputResumeFile,
+                                                lifecycleOwner = LocalLifecycleOwner.current
+                                            )
+                                        }
+                                    }
+                                }
+                            }else{
+                                if (outputCoverLetterFile!!.exists()){
+                                    Box(
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                                            .padding(2.dp)
+                                    ){
+                                        key(hasReloaded){
+                                            PdfRendererViewCompose(
+                                                file = outputCoverLetterFile,
+                                                lifecycleOwner = LocalLifecycleOwner.current
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

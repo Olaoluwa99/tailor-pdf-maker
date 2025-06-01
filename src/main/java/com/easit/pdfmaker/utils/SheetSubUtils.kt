@@ -284,6 +284,7 @@ fun ResultFixItem(
             text = title,
             style = LocalTextStyle.current.merge(TextStyle(lineHeight = 1.2.em)),
             //modifier = Modifier.fillMaxWidth(),
+            maxLines = 1,
             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
             overflow = TextOverflow.Ellipsis
         )
