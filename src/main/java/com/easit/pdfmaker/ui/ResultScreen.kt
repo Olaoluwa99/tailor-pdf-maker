@@ -682,7 +682,7 @@ fun ResultScreen(
             modifier = Modifier
                 .padding(
                     top = 16.dp,
-                    bottom = (buttonHeightDp * 2) + 80.dp)
+                    bottom = 0.dp)
         ){
             LazyRow (
                 modifier = Modifier
@@ -876,6 +876,8 @@ fun ResultScreen(
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height((buttonHeightDp * 2) + 180.dp))
             }
         }
 

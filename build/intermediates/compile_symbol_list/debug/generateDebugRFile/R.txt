@@ -18,6 +18,7 @@ int drawable list_type1 0x0
 int drawable list_type2 0x0
 int drawable list_type3 0x0
 int drawable list_type4 0x0
+int drawable notification_image 0x0
 int drawable omega_letter 0x0
 int drawable omega_letter_large 0x0
 int drawable omega_resume 0x0

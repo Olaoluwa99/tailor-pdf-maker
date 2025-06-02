@@ -74,7 +74,7 @@ fun showPdfNotification(context: Context, pdfFilePath: String, tag: String) {
 
     // Build the Notification
     val notification = NotificationCompat.Builder(context, channelId)
-        .setSmallIcon(android.R.drawable.ic_menu_view)
+        .setSmallIcon(R.drawable.notification_image)
         .setContentTitle("Download Complete - ($tag)")
         .setContentText("Your PDF has been successfully downloaded. Tap to open.")
         .setContentIntent(pendingIntent)

@@ -20,6 +20,7 @@ drawable list_type1
 drawable list_type2
 drawable list_type3
 drawable list_type4
+drawable notification_image
 drawable omega_letter
 drawable omega_letter_large
 drawable omega_resume
