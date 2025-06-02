@@ -304,6 +304,23 @@ class ResumeMaker(private val path: String){
                     }
                 }
             }
+
+            //REFERENCES
+            if (mainSectionList.contains(Sections.REFERENCES)){
+                if (item.referencesList.isNotEmpty()) {
+                    if (toShowUnderline){
+                        val referencesHeader =  createHeaderWithHorizontalLine("REFERENCES", mainThemeColor)
+                        referencesHeader.spacingBefore = headerSpacingBefore
+                        document.add(referencesHeader)
+                    }else {
+                        val referencesHeader = createHeader("REFERENCES")
+                        referencesHeader.spacingBefore = headerSpacingBefore
+                        document.add(referencesHeader)
+                    }
+                    //
+                    document.add(createSingleColumnSection(item.referencesList))
+                }
+            }
         } catch (de: DocumentException) {
             println(de.message)
             Log.e("Error - Doc", de.message ?: "")
@@ -524,6 +541,23 @@ class ResumeMaker(private val path: String){
                     }
                     //
                     mainDualCell2.addElement(createSingleColumnSectionSplit(item.certificationList))
+                }
+            }
+
+            //REFERENCES
+            if (mainSectionList.contains(Sections.REFERENCES)){
+                if (item.referencesList.isNotEmpty()) {
+                    if (toShowUnderline){
+                        val referencesHeader =  createHeaderWithHorizontalLine("REFERENCES", mainThemeColor)
+                        referencesHeader.spacingBefore = headerSpacingBefore
+                        mainDualCell2.addElement(referencesHeader)
+                    }else {
+                        val referencesHeader = createHeader("REFERENCES")
+                        referencesHeader.spacingBefore = headerSpacingBefore
+                        mainDualCell2.addElement(referencesHeader)
+                    }
+                    //
+                    mainDualCell2.addElement(createSingleColumnSectionSplit(item.referencesList))
                 }
             }
 

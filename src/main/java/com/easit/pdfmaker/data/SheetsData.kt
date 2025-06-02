@@ -69,6 +69,7 @@ val allSectionList = listOf(
     SectionData("Soft skills", Sections.SOFT_SKILLS),
     SectionData("Certification", Sections.CERTIFICATIONS),
     SectionData("Hobbies", Sections.HOBBIES),
+    SectionData("References", Sections.REFERENCES),
 )
 
 val listTypeList = listOf(

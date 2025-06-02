@@ -115,7 +115,7 @@ fun ResultScreen(
     var outputResumeFile: File? by remember { mutableStateOf(null) }
     var outputCoverLetterFile: File? by remember { mutableStateOf(null) }
 
-    var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, Sections.EXPERIENCE, Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS, Sections.HOBBIES)) }
+    var sectionList by remember { mutableStateOf(listOf(Sections.OBJECTIVE, Sections.EXPERIENCE, Sections.EDUCATION, Sections.SKILLS, Sections.SOFT_SKILLS, Sections.PROJECT, Sections.CERTIFICATIONS)) }
 
     //
     var skillFormatType by remember { mutableStateOf(ListFormat.FLOW_ROW) }

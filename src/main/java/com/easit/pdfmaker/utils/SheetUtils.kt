@@ -380,6 +380,7 @@ fun SelectSections(
     var isSoftSkillsChecked by remember { mutableStateOf(true) }
     var isCertificationsChecked by remember { mutableStateOf(true) }
     var isHobbiesChecked by remember { mutableStateOf(true) }
+    var isReferencesChecked by remember { mutableStateOf(true) }
 
     LaunchedEffect(key1 = 0) {
         currentSectionList = defaultSectionList.toMutableList()
@@ -392,6 +393,7 @@ fun SelectSections(
         isSoftSkillsChecked = defaultSectionList.contains(allSectionList[5].section)
         isCertificationsChecked = defaultSectionList.contains(allSectionList[6].section)
         isHobbiesChecked = defaultSectionList.contains(allSectionList[7].section)
+        isReferencesChecked = defaultSectionList.contains(allSectionList[8].section)
     }
 
 
@@ -531,6 +533,21 @@ fun SelectSections(
                         }else {
                             currentSectionList.add(item)
                             isHobbiesChecked = true
+                        }
+                    }
+                )
+
+                SectionItem(
+                    title = allSectionList[8].tag,
+                    defaultIsChecked = isReferencesChecked,
+                    onCheckedChange = {
+                        val item = allSectionList[8].section
+                        if (currentSectionList.contains(item)){
+                            currentSectionList.remove(item)
+                            isReferencesChecked = false
+                        }else {
+                            currentSectionList.add(item)
+                            isReferencesChecked = true
                         }
                     }
                 )

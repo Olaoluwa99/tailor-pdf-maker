@@ -46,7 +46,8 @@ data class ResumeData(
     val skillsList: List<String>,
     val softSkillsList: List<String>? = null,
     val certificationList: List<String>? = null,
-    val hobbiesList: List<String>? = null
+    val hobbiesList: List<String>? = null,
+    val referencesList: List<String> = emptyList()
 )
 
 @Serializable
