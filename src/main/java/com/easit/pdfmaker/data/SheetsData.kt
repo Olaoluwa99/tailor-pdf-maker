@@ -29,12 +29,12 @@ data class PdfUiData(
 )
 
 fun deserializePdfUiData(text: String): PdfUiData {
-    val data: PdfUiData = Json.decodeFromString(text.trim())
+    val data: PdfUiData = relaxedJson.decodeFromString(text.trim())
     return data
 }
 
 fun serializePdfUiData(data: PdfUiData): String{
-    val serializedString: String = Json.encodeToString(data)
+    val serializedString: String = relaxedJson.encodeToString(data)
     return serializedString
 }
 
