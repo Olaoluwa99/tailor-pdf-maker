@@ -1,5 +1,8 @@
 package com.easit.pdfmaker.data
 
+import androidx.annotation.Keep
+
+@Keep
 data class PdfMakerSettingsReplica(
     val viewMode: Boolean = true,
     val automaticTheme: Boolean = true,

@@ -1,7 +1,9 @@
 package com.easit.pdfmaker.data
 
+import androidx.annotation.Keep
 import kotlinx.serialization.Serializable
 
+@Keep
 @Serializable
 data class AllResultData(
     val resume: ResumeData? = null,
@@ -9,6 +11,7 @@ data class AllResultData(
     val keywords: List<String> = emptyList()
 )
 
+@Keep
 @Serializable
 data class CoverLetterData(
     val name: String,
@@ -27,7 +30,7 @@ data class CoverLetterData(
     val closingName: String
 )
 
-
+@Keep
 @Serializable
 data class ResumeData(
     val name: String,
@@ -49,7 +52,7 @@ data class ResumeData(
     val hobbiesList: List<String>? = null,
     val referencesList: List<String> = emptyList()
 )
-
+@Keep
 @Serializable
 data class ExperienceItem(
     val experienceRole: String,
@@ -59,6 +62,7 @@ data class ExperienceItem(
     val experienceItemsList: List<String>
 )
 
+@Keep
 @Serializable
 data class EducationItem(
     val degreeEarned: String,
@@ -67,6 +71,7 @@ data class EducationItem(
     val graduatedDate: String
 )
 
+@Keep
 @Serializable
 data class ProjectItem(
     val projectName: String,
