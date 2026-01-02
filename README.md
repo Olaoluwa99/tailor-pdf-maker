@@ -6,6 +6,8 @@
 
 > **Note:** This repository allows public access to the PDF generation module used in **TailoR Ai**. It serves as a showcase of dynamic document generation and formatting using Android & Kotlin.
 
+<img width="3684" height="2368" alt="main-pdf-maker" src="https://github.com/user-attachments/assets/b4b59171-58a4-43b8-9cf8-789f2ab61cdc" />
+
 ## 📱 About TailoR Ai & This Module
 
 **TailoR Ai** is a comprehensive mobile application designed to streamline the job application process. While the core application handles complex AI-driven logic, this specific module handles the **visual construction and rendering** of professional resumes and cover letters.
@@ -49,9 +51,11 @@ private fun Document.addStyledParagraph(
     }
     this.add(paragraph)
 }
+```
+
 2. Handling Layouts (The "Flow Row" Challenge) Standard PDFs write top-to-bottom. To achieve the "Skill Tags" look (seen in the screenshots), you must use a PdfPTable with specific border settings.
 
-Kotlin
+```kotlin
 
 // Pseudo-code logic used in this repo for Skill Chips
 val table = PdfPTable(3) // 3 Columns
@@ -67,19 +71,22 @@ skillsList.forEach { skill ->
     table.addCell(cell)
 }
 document.add(table)
+```
+
 3. Previewing in Jetpack Compose Since OpenPDF generates a file/stream, you cannot "preview" it natively in a Compose View. This project generates the PDF to a temporary cache file and renders it using a Bitmap renderer or a native PDF Viewer intent for the immediate feedback loop shown in the app.
 
 🚀 Getting Started
 Clone the repository:
 
-Bash
-
+```Bash
 git clone [https://github.com/Olaoluwa99/tailor-pdf-maker.git](https://github.com/Olaoluwa99/tailor-pdf-maker.git)
+```
 Open in Android Studio: Ensure you are using the latest version (Koala/Ladybug) compatible with the Compose version used.
 
 Run the Sample: The app module contains a sample activity that launches the PDF builder interface.
 
 🤝 Contribution & License
+
 This is a sub-repository of the private TailoR Ai project.
 
 Issues regarding PDF rendering bugs are welcome.
