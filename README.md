@@ -16,7 +16,7 @@ This module demonstrates how to bridge the gap between Modern Android UI (Jetpac
 
 | Dynamic Styling | Layout Engine | Content Control |
 | :---: | :---: | :---: |
-| <img src="YOUR_IMAGE_LINK_HERE" width="200"> | <img src="YOUR_IMAGE_LINK_HERE" width="200"> | <img src="YOUR_IMAGE_LINK_HERE" width="200"> |
+| <img width="200" alt="1767343386018_100" src="https://github.com/user-attachments/assets/88904171-9b39-45a4-afe5-f1331ed0bccf" /> | <img width="200" alt="1767343344440_100" src="https://github.com/user-attachments/assets/efd3471c-1dff-4ffc-a045-ef87753cd383" /> | <img width="200" alt="1767343327315_100" src="https://github.com/user-attachments/assets/1d01d186-f9be-41a8-8c50-8eb53dabc9c5" /> |
 | **Real-time Color Injection:** Modify accent colors and link styles on the fly. | **Smart Flow Layouts:** Switch between Grid, Column, or FlowRow implementation for skills. | **Section Toggling:** Dynamically include or exclude sections (Experience, Hobbies) without breaking the PDF structure. |
 
 ## 🛠️ Technical Implementation: OpenPDF in Kotlin
